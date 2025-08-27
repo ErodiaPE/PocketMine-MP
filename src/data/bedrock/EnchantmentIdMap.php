@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\data\bedrock;
 
 use pocketmine\item\enchantment\Enchantment;
+use pocketmine\item\enchantment\StringToEnchantmentParser;
 use pocketmine\item\enchantment\VanillaEnchantments;
 use pocketmine\utils\SingletonTrait;
 
@@ -68,5 +69,10 @@ final class EnchantmentIdMap{
 		$this->register(EnchantmentIds::SWIFT_SNEAK, VanillaEnchantments::SWIFT_SNEAK());
 
 		$this->register(EnchantmentIds::FROST_WALKER, VanillaEnchantments::FROST_WALKER());
+
+		$this->register(EnchantmentIds::BLANK_USED_ID, new Enchantment("", 0, 0, 0, 1));
+
+		$this->register(EnchantmentIds::BLANK_USED_ID + 1, $ench = new Enchantment("Nigger", 0, 0, 0, 3));
+		StringToEnchantmentParser::getInstance()->register("nigger", fn() => $ench);
 	}
 }

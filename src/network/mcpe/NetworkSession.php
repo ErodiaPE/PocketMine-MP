@@ -40,6 +40,7 @@ use pocketmine\network\mcpe\cache\ChunkCache;
 use pocketmine\network\mcpe\compression\CompressBatchPromise;
 use pocketmine\network\mcpe\compression\Compressor;
 use pocketmine\network\mcpe\compression\DecompressionException;
+use pocketmine\network\mcpe\convert\NetworkSessionTypeConverter;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\encryption\DecryptionException;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
@@ -219,6 +220,15 @@ class NetworkSession{
 		private string $ip,
 		private int $port
 	){
+		$rc  = new \ReflectionClass(TypeConverter::class);
+		$dst = (new \ReflectionClass(NetworkSessionTypeConverter::class))->newInstanceWithoutConstructor();
+		foreach ($rc->getProperties() as $prop) {
+			$prop->setValue($dst, $prop->getValue($this->typeConverter));
+		}
+		$dst->init($this);
+
+		$this->typeConverter = $dst;
+
 		$this->logger = new \PrefixedLogger($this->server->getLogger(), $this->getLogPrefix());
 
 		$this->compressedQueue = new \SplQueue();

@@ -295,6 +295,8 @@ class Server{
 
 	private ServerConfigGroup $configGroup;
 	private Config $tweaks;
+	/** @var Language[] */
+	private array $minecraftLanguages = [];
 
 	/** @var Player[] */
 	private array $playerList = [];
@@ -672,6 +674,17 @@ class Server{
 		return $this->tweaks;
 	}
 
+	public function getMinecraftLanguage(string $lang) : ?Language{
+		return $this->minecraftLanguages[$lang] ?? null;
+	}
+
+	/**
+	 * @return Language[]
+	 */
+	public function getMinecraftLanguages() : array{
+		return $this->minecraftLanguages;
+	}
+
 	public function getConfigGroup() : ServerConfigGroup{
 		return $this->configGroup;
 	}
@@ -879,6 +892,27 @@ class Server{
 			}
 
 			$this->logger->info($this->language->translate(KnownTranslationFactory::language_selected($this->language->getName(), $this->language->getLang())));
+
+			$pmmpLanguage = $this->getLanguage();
+			$reflectionClass = new \ReflectionClass(Language::class);
+			$property = $reflectionClass->getProperty("lang");
+
+			$minecraftLanguagesPath = Path::join(\pocketmine\RESOURCE_PATH, "minecraft");
+			$languageFiles = scandir($minecraftLanguagesPath);
+			if($languageFiles !== false){
+				foreach($languageFiles as $file){
+					$fullPath = Path::join($minecraftLanguagesPath, $file);
+					if(is_file($fullPath) && str_ends_with($file, ".lang")){
+						$code = substr($file, 0, -5);
+
+						$clonedLang = clone $pmmpLanguage;
+						$property->setValue($clonedLang, parse_ini_file($fullPath, false, INI_SCANNER_RAW));
+
+						$this->minecraftLanguages[$code] = $clonedLang;
+					}
+				}
+			}
+			$this->logger->info("Loaded " . count($this->minecraftLanguages) . " Minecraft language(s)");
 
 			if(VersionInfo::IS_DEVELOPMENT_BUILD){
 				if(!$this->configGroup->getPropertyBool(Yml::SETTINGS_ENABLE_DEV_BUILDS, false)){

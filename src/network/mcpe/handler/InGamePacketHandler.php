@@ -44,6 +44,7 @@ use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\mcpe\convert\NetworkSessionTypeConverter;
 use pocketmine\network\mcpe\InventoryManager;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
@@ -639,6 +640,13 @@ class InGamePacketHandler extends PacketHandler{
 			$this->inventoryManager->onClientSelectHotbarSlot($packet->hotbarSlot);
 			if(!$this->player->selectHotbarSlot($packet->hotbarSlot)){
 				$this->inventoryManager->syncSelectedHotbarSlot();
+			}
+
+			/** @var NetworkSessionTypeConverter $typeConverter */
+			$typeConverter = $this->session->getTypeConverter();
+			$pk = $typeConverter->coreItemStackToGuiDataPickItem($this->player->getInventory()->getItemInHand());
+			if($pk !== null){
+				$this->session->sendDataPacket($pk);
 			}
 			return true;
 		}
