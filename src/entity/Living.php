@@ -407,6 +407,11 @@ abstract class Living extends Entity{
 			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_FALL, $damage);
 			$this->attack($ev);
 
+			if($ev->isCancelled()){
+				// Cancel fall damage also cancels the sound
+				return $newVerticalVelocity;
+			}
+
 			$this->broadcastSound($damage > 4 ?
 				new EntityLongFallSound($this) :
 				new EntityShortFallSound($this)
@@ -471,10 +476,13 @@ abstract class Living extends Entity{
 			// This modifier is applied before other damage reductions such as enchantments or effects.
 
 			$armorPoints = $this->getArmorPoints();
-			$source->setModifier(
+			/*
+			 * $source->setModifier(
 				-$source->getFinalDamage() * min($armorPoints / ($armorPoints + 5), 0.80),
 				EntityDamageEvent::MODIFIER_ARMOR
 			);
+			 */
+			$source->setModifier(-$source->getFinalDamage() * $this->getArmorPoints() * 0.04, EntityDamageEvent::MODIFIER_ARMOR);
 		}
 
 		$cause = $source->getCause();
