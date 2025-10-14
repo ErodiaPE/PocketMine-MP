@@ -61,7 +61,6 @@ use pocketmine\network\mcpe\protocol\ChunkRadiusUpdatedPacket;
 use pocketmine\network\mcpe\protocol\ClientboundCloseFormPacket;
 use pocketmine\network\mcpe\protocol\ClientboundPacket;
 use pocketmine\network\mcpe\protocol\DisconnectPacket;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\ModalFormRequestPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\NetworkChunkPublisherUpdatePacket;
@@ -112,9 +111,6 @@ use pocketmine\promise\PromiseResolver;
 use pocketmine\Server;
 use pocketmine\timings\Timings;
 use pocketmine\utils\AssumptionFailedError;
-use pocketmine\utils\Binary;
-use pocketmine\utils\BinaryDataException;
-use pocketmine\utils\BinaryStream;
 use pocketmine\utils\ObjectSet;
 use pocketmine\utils\TextFormat;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
@@ -198,17 +194,6 @@ class NetworkSession{
 	 */
 	private ObjectSet $disposeHooks;
 
-	/**
-	 * @var string[]
-	 * @phpstan-var array<int, string>
-	 */
-	private array $repeatedPacketFilters = [];
-	/**
-	 * @var int[]
-	 * @phpstan-var array<int, int>
-	 */
-	private array $repeatedPacketFilterStats = [];
-
 	public function __construct(
 		private Server $server,
 		private NetworkSessionManager $manager,
@@ -235,8 +220,6 @@ class NetworkSession{
 			$this,
 			$this->onSessionStartSuccess(...)
 		));
-
-		$this->addRepeatedPacketFilter(InventoryTransactionPacket::NETWORK_ID);
 
 		$this->manager->add($this);
 		$this->logger->info($this->server->getLanguage()->translate(KnownTranslationFactory::pocketmine_network_session_open()));
@@ -367,44 +350,6 @@ class NetworkSession{
 		}
 	}
 
-	public function addRepeatedPacketFilter(int $packetId) : void{
-		$this->repeatedPacketFilters[$packetId] = "";
-		$this->repeatedPacketFilterStats[$packetId] = 0;
-	}
-
-	public function removeRepeatedPacketFilter(int $packetId) : void{
-		unset($this->repeatedPacketFilters[$packetId]);
-		unset($this->repeatedPacketFilterStats[$packetId]);
-	}
-
-	/**
-	 * Returns the stats for repeated packet filters, indexed by packet ID.
-	 * The value is the number of times a packet was dropped due to being repeated.
-	 *
-	 * @return int[]
-	 * @phpstan-return array<int, int>
-	 */
-	public function getRepeatedPacketFilterStats() : array{
-		return $this->repeatedPacketFilterStats;
-	}
-
-	private function checkRepeatedPacketFilter(string $buffer) : bool{
-		//TODO: would be great if we didn't repeat reading the ID inside PacketPool
-		$dummy = 0;
-		$packetId = Binary::readUnsignedVarInt($buffer, $dummy);
-
-		if(isset($this->repeatedPacketFilters[$packetId])){
-			if($buffer === $this->repeatedPacketFilters[$packetId]){
-				$this->repeatedPacketFilterStats[$packetId]++;
-				return true;
-			}
-
-			$this->repeatedPacketFilters[$packetId] = $buffer;
-		}
-
-		return false;
-	}
-
 	/**
 	 * @throws PacketHandlingException
 	 */
@@ -458,10 +403,6 @@ class NetworkSession{
 			try{
 				$stream = new ByteBufferReader($decompressed);
 				foreach(PacketBatch::decodeRaw($stream) as $buffer){
-					if($this->checkRepeatedPacketFilter($buffer)){
-						continue;
-					}
-
 					$this->gamePacketLimiter->decrement();
 					$packet = $this->packetPool->getPacket($buffer);
 					if($packet === null){
