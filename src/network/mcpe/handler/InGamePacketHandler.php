@@ -36,6 +36,7 @@ use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\inventory\transaction\TransactionBuilder;
 use pocketmine\inventory\transaction\TransactionCancelledException;
 use pocketmine\inventory\transaction\TransactionValidationException;
+use pocketmine\item\Sword;
 use pocketmine\item\VanillaItems;
 use pocketmine\item\WritableBook;
 use pocketmine\item\WritableBookPage;
@@ -747,6 +748,12 @@ class InGamePacketHandler extends PacketHandler{
 			case PlayerAction::CREATIVE_PLAYER_DESTROY_BLOCK:
 				if(!$this->player->isCreative()) {
 					$this->player->getNetworkSession()->getLogger()->debug("Ignoring PlayerAction $action on $pos because player isnt in creative");
+					$this->syncBlocksNearby($pos, $face);
+					break;
+				}
+
+				$item = $this->player->getInventory()->getItemInHand();
+				if($item instanceof Sword) {
 					$this->syncBlocksNearby($pos, $face);
 					break;
 				}
