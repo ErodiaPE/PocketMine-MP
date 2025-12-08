@@ -1134,7 +1134,6 @@ class NetworkSession{
 		$commandData = [];
 		$softEnums = [];
 		$hardcodedEnums = [];
-		$enumConstraints = [];
 		foreach($this->server->getCommandMap()->getCommands() as $command){
 			if(isset($commandData[$command->getLabel()]) || $command->getLabel() === "help" || !$command->testPermissionSilent($this->player)){
 				continue;
@@ -1158,14 +1157,14 @@ class NetworkSession{
 				0,
 				0,
 				$aliasObj,
-				$command->buildOverloads($hardcodedEnums, $softEnums, $enumConstraints),
+				$command->buildOverloads($hardcodedEnums, $softEnums),
 				chainedSubCommandData: []
 			);
 
 			$commandData[$command->getLabel()] = $data;
 		}
 
-		$this->sendDataPacket(AvailableCommandsPacketAssembler::assemble(array_values($commandData), [], []));
+		$this->sendDataPacket(AvailableCommandsPacketAssembler::assemble(array_values($commandData), $hardcodedEnums, $softEnums));
 	}
 
 	/**

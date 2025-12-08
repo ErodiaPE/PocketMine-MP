@@ -30,6 +30,7 @@ use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnumConstraint;
+use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\DefaultPermissionNames;
@@ -50,20 +51,14 @@ class GamemodeCommand extends VanillaCommand{
 		]);
 	}
 
-	/**
-	 * @param CommandEnum[]           $hardcodedEnums
-	 * @param CommandEnum[]           $softEnums
-	 * @param CommandEnumConstraint[] $enumConstraints
-	 * @return CommandOverload[]
-	 */
-	public function buildOverloads(array &$hardcodedEnums, array &$softEnums, array &$enumConstraints) : array{
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
 		$gamemodeOptions = array_keys(GameMode::getAll());
 		$gamemodeOptions = array_merge($gamemodeOptions, array_map(fn(string $gameModeString) => $gameModeString[0], $gamemodeOptions));
 		$gamemodeOptions = array_map(fn(string $gameModeString) => mb_strtolower($gameModeString), $gamemodeOptions);
 
 		return [
 			new CommandOverload(chaining: false, parameters: [
-				CommandParameter::enum("gameMode", new CommandEnum('GameMode', $gamemodeOptions, false), 0, false),
+				CommandParameter::enum("gameMode", new CommandHardEnum('GameMode', $gamemodeOptions, false), 0, false),
 				CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, true),
 			]),
 			new CommandOverload(chaining: false, parameters: [

@@ -35,6 +35,7 @@ use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnumConstraint;
+use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\DefaultPermissionNames;
@@ -53,16 +54,10 @@ class ClearCommand extends VanillaCommand{
 		$this->setPermissions([DefaultPermissionNames::COMMAND_CLEAR_SELF, DefaultPermissionNames::COMMAND_CLEAR_OTHER]);
 	}
 
-	/**
-	 * @param CommandEnum[]           $hardcodedEnums
-	 * @param CommandEnum[]           $softEnums
-	 * @param CommandEnumConstraint[] $enumConstraints
-	 * @return CommandOverload[]
-	 */
-	public function buildOverloads(array &$hardcodedEnums, array &$softEnums, array &$enumConstraints) : array{
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
 		/** @var string[] $itemOptions */
 		$itemOptions = StringToItemParser::getInstance()->getKnownAliases();
-		$itemName = new CommandEnum('Item', $itemOptions, true);
+		$itemName = new CommandHardEnum('Item', $itemOptions);
 
 		$hardcodedEnums[mb_strtolower($itemName->getName())] = $itemName;
 

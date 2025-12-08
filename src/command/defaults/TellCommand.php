@@ -51,13 +51,7 @@ class TellCommand extends VanillaCommand{
 		$this->setPermission(DefaultPermissionNames::COMMAND_TELL);
 	}
 
-	/**
-	 * @param CommandEnum[]           $hardcodedEnums
-	 * @param CommandEnum[]           $softEnums
-	 * @param CommandEnumConstraint[] $enumConstraints
-	 * @return CommandOverload[]
-	 */
-	public function buildOverloads(array &$hardcodedEnums, array &$softEnums, array &$enumConstraints) : array{
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
 		return [
 			new CommandOverload(chaining: false, parameters: [
 				CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, false),

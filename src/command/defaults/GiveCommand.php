@@ -36,6 +36,7 @@ use pocketmine\nbt\NbtException;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandEnumConstraint;
+use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\DefaultPermissionNames;
@@ -58,14 +59,8 @@ class GiveCommand extends VanillaCommand{
 		]);
 	}
 
-	/**
-	 * @param CommandEnum[]           $hardcodedEnums
-	 * @param CommandEnum[]           $softEnums
-	 * @param CommandEnumConstraint[] $enumConstraints
-	 * @return CommandOverload[]
-	 */
-	public function buildOverloads(array &$hardcodedEnums, array &$softEnums, array &$enumConstraints) : array{
-		$itemName = new CommandEnum('Item', [], false);
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
+		$itemName = new CommandHardEnum('Item', [], false);
 		return [
 			new CommandOverload(chaining: false, parameters: [
 				CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET, 0, false),

@@ -95,13 +95,12 @@ abstract class Command{
 	abstract public function execute(CommandSender $sender, string $commandLabel, array $args);
 
 	/**
-	 * @param CommandEnum[]           $hardcodedEnums
-	 * @param CommandEnum[]           $softEnums
-	 * @param CommandEnumConstraint[] $enumConstraints
+	 * @param array $hardcodedEnums
+	 * @param array $softEnums
 	 *
-	 * @return array
+	 * @return CommandOverload[]
 	 */
-	public function buildOverloads(array &$hardcodedEnums, array &$softEnums, array &$enumConstraints) : array{
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
 		return [new CommandOverload(chaining: false, parameters: [CommandParameter::standard("args", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, true)])];
 	}
 
