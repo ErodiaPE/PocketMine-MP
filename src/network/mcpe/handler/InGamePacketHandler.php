@@ -46,6 +46,7 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\FilterNoisyPacketException;
+use pocketmine\network\mcpe\convert\ItemTranslator;
 use pocketmine\network\mcpe\InventoryManager;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
@@ -108,7 +109,6 @@ use pocketmine\utils\Limits;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 use pocketmine\world\format\Chunk;
-use pocketmine\world\Position;
 use function array_push;
 use function count;
 use function fmod;
@@ -120,6 +120,7 @@ use function is_nan;
 use function json_decode;
 use function max;
 use function mb_strlen;
+use function microtime;
 use function sprintf;
 use function str_starts_with;
 use function strlen;
@@ -128,8 +129,21 @@ use const JSON_THROW_ON_ERROR;
 /**
  * This handler handles packets related to general gameplay.
  */
+#[SilentDiscard(ActorEventPacket::class, comment: "Not needed")]
+#[SilentDiscard(LevelSoundEventPacket::class, comment: "Sounds are always handled server side")]
+#[SilentDiscard(MobArmorEquipmentPacket::class, comment: "Not needed")]
+#[SilentDiscard(MovePlayerPacket::class, comment: "Not needed, noisy debug when landing on ground")]
+#[SilentDiscard(NetworkStackLatencyPacket::class, comment: "Not used, noisy debug")]
+#[SilentDiscard(PlayerHotbarPacket::class, comment: "Not needed")]
+#[SilentDiscard(SetActorMotionPacket::class, comment: "Not needed, erroneously sent by client when in a vehicle")]
+#[SilentDiscard(SpawnExperienceOrbPacket::class, comment: "XP drops should be server-calculated")]
 class InGamePacketHandler extends PacketHandler{
 	private const MAX_FORM_RESPONSE_DEPTH = 2; //modal/simple will be 1, custom forms 2 - they will never contain anything other than string|int|float|bool|null
+
+	//TODO: The client-side per-page character limit is inconsistent for non-ASCII text,
+	//allowing input beyond 256 chars. Use a slightly higher bounded soft limit to
+	//prevent rejected edits while still mitigating book-bomb attacks
+	private const PAGE_LENGTH_SOFT_LIMIT_CHARS = 512;
 
 	protected float $lastRightClickTime = 0.0;
 	protected ?UseItemTransactionData $lastRightClickData = null;
@@ -199,20 +213,35 @@ class InGamePacketHandler extends PacketHandler{
 			$this->player->setRotation($yaw, $pitch);
 		}
 
+		$hasMoved = $this->lastPlayerAuthInputPosition === null || !$this->lastPlayerAuthInputPosition->equals($rawPos);
+		$newPos = $rawPos->subtract(0, 1.62, 0)->round(4);
+
+		if($this->forceMoveSync && $hasMoved){
+			$curPos = $this->player->getLocation();
+
+			if($newPos->distanceSquared($curPos) > 1){  //Tolerate up to 1 block to avoid problems with client-sided physics when spawning in blocks
+				$this->session->getLogger()->debug("Got outdated pre-teleport movement, received " . $newPos . ", expected " . $curPos);
+				//Still getting movements from before teleport, ignore them
+				return true;
+			}
+
+			// Once we get a movement within a reasonable distance, treat it as a teleport ACK and remove position lock
+			$this->forceMoveSync = false;
+		}
+
 		$inputFlags = $packet->getInputFlags();
 		if($this->lastPlayerAuthInputFlags === null || !$inputFlags->equals($this->lastPlayerAuthInputFlags)){
 			$this->lastPlayerAuthInputFlags = $inputFlags;
 
-			$sneaking = $inputFlags->get(PlayerAuthInputFlags::SNEAKING);
-			if($this->player->isSneaking() === $sneaking){
-				$sneaking = null;
-			}
+			$sneakPressed = $inputFlags->get(PlayerAuthInputFlags::SNEAKING);
+
+			$sneaking = $this->resolveOnOffInputFlags($inputFlags, PlayerAuthInputFlags::START_SNEAKING, PlayerAuthInputFlags::STOP_SNEAKING);
 			$sprinting = $this->resolveOnOffInputFlags($inputFlags, PlayerAuthInputFlags::START_SPRINTING, PlayerAuthInputFlags::STOP_SPRINTING);
 			$swimming = $this->resolveOnOffInputFlags($inputFlags, PlayerAuthInputFlags::START_SWIMMING, PlayerAuthInputFlags::STOP_SWIMMING);
 			$gliding = $this->resolveOnOffInputFlags($inputFlags, PlayerAuthInputFlags::START_GLIDING, PlayerAuthInputFlags::STOP_GLIDING);
 			$flying = $this->resolveOnOffInputFlags($inputFlags, PlayerAuthInputFlags::START_FLYING, PlayerAuthInputFlags::STOP_FLYING);
 			$mismatch =
-				($sneaking !== null && !$this->player->toggleSneak($sneaking)) |
+				(!$this->player->toggleSneak($sneaking ?? $this->player->isSneaking(), $sneakPressed)) |
 				($sprinting !== null && !$this->player->toggleSprint($sprinting)) |
 				($swimming !== null && !$this->player->toggleSwim($swimming)) |
 				($gliding !== null && !$this->player->toggleGlide($gliding)) |
@@ -238,7 +267,6 @@ class InGamePacketHandler extends PacketHandler{
 		$delta = round($packet->getDelta()->getY(), 4);
 		$this->player->onGround = $delta == -0.0784;
 
-		$this->processMovements($packet->getPosition(), fixHeadOffset: true);
 		$packetHandled = true;
 
 		$useItemTransaction = $packet->getItemInteractionData();
@@ -324,27 +352,6 @@ class InGamePacketHandler extends PacketHandler{
 			//TODO: this packet has WAYYYYY more useful information that we're not using
 			$this->player->handleMovement($newPos);
 		}
-	}
-
-	public function handleActorEvent(ActorEventPacket $packet) : bool{
-		if($packet->actorRuntimeId !== $this->player->getId()){
-			//TODO HACK: EATING_ITEM is sent back to the server when the server sends it for other players (1.14 bug, maybe earlier)
-			return $packet->actorRuntimeId === ActorEvent::EATING_ITEM;
-		}
-
-		switch($packet->eventId){
-			case ActorEvent::EATING_ITEM: //TODO: ignore this and handle it server-side
-				$item = $this->player->getInventory()->getItemInHand();
-				if($item->isNull()){
-					return false;
-				}
-				$this->player->broadcastAnimation(new ConsumingItemAnimation($this->player, $this->player->getInventory()->getItemInHand()));
-				break;
-			default:
-				return false;
-		}
-
-		return true;
 	}
 
 	public function handleInventoryTransaction(InventoryTransactionPacket $packet) : bool{
@@ -500,7 +507,7 @@ class InGamePacketHandler extends PacketHandler{
 
 	private function handleUseItemTransaction(UseItemTransactionData $data) : bool{
 		$this->player->selectHotbarSlot($data->getHotbarSlot());
-		$this->processMovements($data->getPlayerPosition(), fixHeadOffset: false);
+
 		switch($data->getActionType()){
 			case UseItemTransactionData::ACTION_CLICK_BLOCK:
 				//TODO: start hack for client spam bug
@@ -583,7 +590,7 @@ class InGamePacketHandler extends PacketHandler{
 		}
 
 		$this->player->selectHotbarSlot($data->getHotbarSlot());
-		$this->processMovements($data->getPlayerPosition(), fixHeadOffset: false);
+
 		switch($data->getActionType()){
 			case UseItemOnEntityTransactionData::ACTION_INTERACT:
 				$this->player->interactEntity($target, $data->getClickPosition());
@@ -599,7 +606,6 @@ class InGamePacketHandler extends PacketHandler{
 	private function handleReleaseItemTransaction(ReleaseItemTransactionData $data) : bool{
 		$this->player->selectHotbarSlot($data->getHotbarSlot());
 
-		$this->processMovements($data->getHeadPosition(), fixHeadOffset: true);
 		if($data->getActionType() === ReleaseItemTransactionData::ACTION_RELEASE){
 			$this->player->releaseHeldItem();
 			return true;
@@ -708,7 +714,6 @@ class InGamePacketHandler extends PacketHandler{
 	private function handlePlayerActionFromData(int $action, BlockPosition $blockPosition, int $face) : bool{
 		$pos = new Vector3($blockPosition->getX(), $blockPosition->getY(), $blockPosition->getZ());
 
-		$this->session->getLogger()->debug("PlayerAction $action on $pos (face: $face)");
 		switch($action){
 			case PlayerAction::START_BREAK:
 			case PlayerAction::CONTINUE_DESTROY_BLOCK: //destroy the next block while holding down left click
@@ -719,13 +724,13 @@ class InGamePacketHandler extends PacketHandler{
 					//this seems like a bug in the client and would cause spurious left-click events if we allowed it to
 					//be delivered to the player
 					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because we were already destroying this block");
-					$this->syncBlocksNearby($pos, $face);
 					break;
 				}
 				if(!$this->player->attackBlock($pos, $face)){
 					$this->syncBlocksNearby($pos, $face);
 				}
 				$this->lastBlockAttacked = $blockPosition;
+
 				break;
 
 			case PlayerAction::ABORT_BREAK:
@@ -747,65 +752,10 @@ class InGamePacketHandler extends PacketHandler{
 			case PlayerAction::INTERACT_BLOCK: //TODO: ignored (for now)
 				break;
 			case PlayerAction::CREATIVE_PLAYER_DESTROY_BLOCK:
-				if(!$this->player->isCreative()) {
-					$this->player->getNetworkSession()->getLogger()->debug("Ignoring PlayerAction $action on $pos because player isnt in creative");
-					$this->syncBlocksNearby($pos, $face);
-					break;
-				}
-
-				$item = $this->player->getInventory()->getItemInHand();
-				if($item instanceof Sword) {
-					$this->syncBlocksNearby($pos, $face);
-					break;
-				}
-
-				if(!$this->player->breakBlock($pos)){
-					$this->syncBlocksNearby($pos, $face);
-				}
+				//in server auth block breaking, we get PREDICT_DESTROY_BLOCK anyway, so this action is redundant
 				break;
 			case PlayerAction::PREDICT_DESTROY_BLOCK:
-				if($this->player->isCreative()) {
-					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because player is in creative mode");
-					break;
-				}
-
-				if($this->lastBlockAttacked === null){
-					//the client will send this when it starts to break a block, but also when it continues to break the
-					//currently targeted block, so we need to ignore it if we don't have a block that we're currently
-					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because we have no block being broken");
-					$this->syncBlocksNearby($pos, $face);
-					break;
-				}
-
-				if($pos->distanceSquared($this->player->getLocation()) > 10000){
-					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because it is too far away from the player");
-					break;
-				}
-
-				$target = $this->player->getWorld()->getBlock($pos);
-				$breakHandler = $this->player->getBlockBreakHandler();
-				if($breakHandler === null && !$target->getBreakInfo()->breaksInstantly()){
-					//the client will send this when it starts to break a block, but also when it continues to break the
-					//currently targeted block, so we need to ignore it if the player has no BlockBreakHandler
-					//this is a hack to prevent the client from spamming this packet when it starts to break a block
-					//this is also sent when the player is not in creative mode, so we need to check that too
-					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because player has no BlockBreakHandler");
-					$this->syncBlocksNearby($pos, $face);
-					break;
-				} else if($breakHandler !== null && !$target->getBreakInfo()->breaksInstantly()) {
-					$breakHandler->update(); // 1 tick compensation for the client sending this packet before the block break progress is updated
-
-					$this->session->getLogger()->debug("PlayerAction $action on $pos with break progress " . $breakHandler->getBreakProgress() . " (face: $face)");
-					if($breakHandler->getBreakProgress() < 1) {
-						//the client will send this when it starts to break a block, but also when it continues to break the
-						//currently targeted block, so we need to ignore it if the break progress is less than 1
-						//this is a hack to prevent the client from spamming this packet when it starts to break a block
-						$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because break progress is less than 1");
-						$this->syncBlocksNearby($pos, $face);
-						break;
-					}
-				}
-
+				self::validateFacing($face);
 				if(!$this->player->breakBlock($pos)){
 					$this->syncBlocksNearby($pos, $face);
 				}
