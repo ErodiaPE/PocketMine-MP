@@ -26,7 +26,7 @@ namespace pocketmine\block;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Living;
 
-final class Slime extends Transparent{
+class Slime extends Transparent{
 
 	public function getFrictionFactor() : float{
 		return 0.8; //???
