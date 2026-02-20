@@ -109,6 +109,7 @@ use pocketmine\utils\Limits;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 use pocketmine\world\format\Chunk;
+use pocketmine\world\Position;
 use function array_push;
 use function count;
 use function fmod;
@@ -267,6 +268,7 @@ class InGamePacketHandler extends PacketHandler{
 		$delta = round($packet->getDelta()->getY(), 4);
 		$this->player->onGround = $delta == -0.0784;
 
+		$this->processMovements($packet->getPosition(), fixHeadOffset: true);
 		$packetHandled = true;
 
 		$useItemTransaction = $packet->getItemInteractionData();
@@ -507,6 +509,7 @@ class InGamePacketHandler extends PacketHandler{
 
 	private function handleUseItemTransaction(UseItemTransactionData $data) : bool{
 		$this->player->selectHotbarSlot($data->getHotbarSlot());
+		$this->processMovements($data->getPlayerPosition(), fixHeadOffset: false);
 
 		switch($data->getActionType()){
 			case UseItemTransactionData::ACTION_CLICK_BLOCK:
@@ -590,6 +593,7 @@ class InGamePacketHandler extends PacketHandler{
 		}
 
 		$this->player->selectHotbarSlot($data->getHotbarSlot());
+		$this->processMovements($data->getPlayerPosition(), fixHeadOffset: false);
 
 		switch($data->getActionType()){
 			case UseItemOnEntityTransactionData::ACTION_INTERACT:
@@ -605,6 +609,7 @@ class InGamePacketHandler extends PacketHandler{
 
 	private function handleReleaseItemTransaction(ReleaseItemTransactionData $data) : bool{
 		$this->player->selectHotbarSlot($data->getHotbarSlot());
+		$this->processMovements($data->getHeadPosition(), fixHeadOffset: true);
 
 		if($data->getActionType() === ReleaseItemTransactionData::ACTION_RELEASE){
 			$this->player->releaseHeldItem();
@@ -714,6 +719,7 @@ class InGamePacketHandler extends PacketHandler{
 	private function handlePlayerActionFromData(int $action, BlockPosition $blockPosition, int $face) : bool{
 		$pos = new Vector3($blockPosition->getX(), $blockPosition->getY(), $blockPosition->getZ());
 
+		$this->session->getLogger()->debug("PlayerAction $action on $pos (face: $face)");
 		switch($action){
 			case PlayerAction::START_BREAK:
 			case PlayerAction::CONTINUE_DESTROY_BLOCK: //destroy the next block while holding down left click
@@ -724,13 +730,13 @@ class InGamePacketHandler extends PacketHandler{
 					//this seems like a bug in the client and would cause spurious left-click events if we allowed it to
 					//be delivered to the player
 					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because we were already destroying this block");
+					$this->syncBlocksNearby($pos, $face);
 					break;
 				}
 				if(!$this->player->attackBlock($pos, $face)){
 					$this->syncBlocksNearby($pos, $face);
 				}
 				$this->lastBlockAttacked = $blockPosition;
-
 				break;
 
 			case PlayerAction::ABORT_BREAK:
@@ -752,10 +758,66 @@ class InGamePacketHandler extends PacketHandler{
 			case PlayerAction::INTERACT_BLOCK: //TODO: ignored (for now)
 				break;
 			case PlayerAction::CREATIVE_PLAYER_DESTROY_BLOCK:
-				//in server auth block breaking, we get PREDICT_DESTROY_BLOCK anyway, so this action is redundant
+				if(!$this->player->isCreative()) {
+					$this->player->getNetworkSession()->getLogger()->debug("Ignoring PlayerAction $action on $pos because player isn't in creative");
+					$this->syncBlocksNearby($pos, $face);
+					break;
+				}
+
+				$item = $this->player->getInventory()->getItemInHand();
+				if($item instanceof Sword) {
+					$this->syncBlocksNearby($pos, $face);
+					break;
+				}
+
+				if(!$this->player->breakBlock($pos)){
+					$this->syncBlocksNearby($pos, $face);
+				}
 				break;
 			case PlayerAction::PREDICT_DESTROY_BLOCK:
 				self::validateFacing($face);
+				if($this->player->isCreative()) {
+					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because player is in creative mode");
+					break;
+				}
+
+				if($this->lastBlockAttacked === null){
+					//the client will send this when it starts to break a block, but also when it continues to break the
+					//currently targeted block, so we need to ignore it if we don't have a block that we're currently
+					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because we have no block being broken");
+					$this->syncBlocksNearby($pos, $face);
+					break;
+				}
+
+				if($pos->distanceSquared($this->player->getLocation()) > 10000){
+					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because it is too far away from the player");
+					break;
+				}
+
+				$target = $this->player->getWorld()->getBlock($pos);
+				$breakHandler = $this->player->getBlockBreakHandler();
+				if($breakHandler === null && !$target->getBreakInfo()->breaksInstantly()){
+					//the client will send this when it starts to break a block, but also when it continues to break the
+					//currently targeted block, so we need to ignore it if the player has no BlockBreakHandler
+					//this is a hack to prevent the client from spamming this packet when it starts to break a block
+					//this is also sent when the player is not in creative mode, so we need to check that too
+					$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because player has no BlockBreakHandler");
+					$this->syncBlocksNearby($pos, $face);
+					break;
+				} else if($breakHandler !== null && !$target->getBreakInfo()->breaksInstantly()) {
+					$breakHandler->update(); // 1 tick compensation for the client sending this packet before the block break progress is updated
+
+					$this->session->getLogger()->debug("PlayerAction $action on $pos with break progress " . $breakHandler->getBreakProgress() . " (face: $face)");
+					if($breakHandler->getBreakProgress() < 1) {
+						//the client will send this when it starts to break a block, but also when it continues to break the
+						//currently targeted block, so we need to ignore it if the break progress is less than 1
+						//this is a hack to prevent the client from spamming this packet when it starts to break a block
+						$this->session->getLogger()->debug("Ignoring PlayerAction $action on $pos because break progress is less than 1");
+						$this->syncBlocksNearby($pos, $face);
+						break;
+					}
+				}
+
 				if(!$this->player->breakBlock($pos)){
 					$this->syncBlocksNearby($pos, $face);
 				}
