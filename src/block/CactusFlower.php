@@ -33,7 +33,7 @@ class CactusFlower extends Flowable{
 		$supportBlock = $block->getSide(Facing::DOWN);
 		return
 			$supportBlock->getSupportType(Facing::UP)->hasCenterSupport() ||
-			$supportBlock->getTypeId() === BlockTypeIds::CACTUS;
+			$supportBlock instanceof Cactus;
 	}
 
 	public function getFlameEncouragement() : int{

@@ -87,7 +87,7 @@ abstract class StringToTParser{
 	}
 
 	protected function reprocess(string $input) : string{
-		return strtolower(str_replace([" ", "minecraft:"], ["_", ""], trim($input)));
+		return strtolower(str_replace([" ", "minecraft:", "erodia:"], ["_", ""], trim($input)));
 	}
 
 	/** @return string[]|int[] */
