@@ -130,6 +130,9 @@ abstract class DefaultPermissions{
 			Names::COMMAND_WHITELIST_REMOVE,
 			Names::COMMAND_XP_OTHER,
 			Names::COMMAND_XP_SELF,
+			Names::COMMAND_KILL_SELF,
+			Names::COMMAND_ME,
+			Names::COMMAND_CLEAR_SELF,
 		] as $permission){
 			self::registerNoArgsDesc($permission, [$operatorRoot]);
 		}
