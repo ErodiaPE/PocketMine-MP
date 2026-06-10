@@ -135,11 +135,8 @@ abstract class DefaultPermissions{
 		}
 
 		foreach([
-			Names::COMMAND_KILL_SELF,
-			Names::COMMAND_ME,
 			Names::COMMAND_HELP,
 			Names::BROADCAST_USER,
-			Names::COMMAND_CLEAR_SELF,
 			Names::COMMAND_TELL,
 			Names::COMMAND_VERSION,
 		] as $permission){
