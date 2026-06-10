@@ -27,6 +27,10 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\lang\KnownTranslationFactory;
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
+use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
+use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\player\Player;
 use pocketmine\world\World;
@@ -47,6 +51,34 @@ class TimeCommand extends VanillaCommand{
 			DefaultPermissionNames::COMMAND_TIME_STOP,
 			DefaultPermissionNames::COMMAND_TIME_QUERY
 		]);
+	}
+
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
+		$actionEnum = new CommandHardEnum("action", ["set", "add", "query", "stop", "start"]);
+		$timeEnum = new CommandHardEnum("time", [
+			"day",
+			"noon",
+			"sunset",
+			"night",
+			"midnight",
+			"sunrise"
+		]);
+
+		return [
+			new CommandOverload(chaining: false, parameters: [
+				CommandParameter::enum("action", $actionEnum, 0)
+			]),
+
+			new CommandOverload(chaining: false, parameters: [
+				CommandParameter::enum("action", $actionEnum, 0),
+				CommandParameter::enum("value", $timeEnum, 0),
+			]),
+
+			new CommandOverload(chaining: false, parameters: [
+				CommandParameter::enum("action", $actionEnum, 0),
+				CommandParameter::standard("value", AvailableCommandsPacket::ARG_TYPE_INT),
+			]),
+		];
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args){

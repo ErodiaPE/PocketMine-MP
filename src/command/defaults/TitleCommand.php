@@ -26,6 +26,10 @@ namespace pocketmine\command\defaults;
 use pocketmine\command\CommandSender;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\lang\KnownTranslationFactory;
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
+use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
+use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\DefaultPermissionNames;
 use function array_slice;
 use function count;
@@ -43,6 +47,43 @@ class TitleCommand extends VanillaCommand{
 			DefaultPermissionNames::COMMAND_TITLE_SELF,
 			DefaultPermissionNames::COMMAND_TITLE_OTHER
 		]);
+	}
+
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
+		$action = new CommandHardEnum("action", [
+			"clear",
+			"reset",
+			"title",
+			"subtitle",
+			"actionbar",
+			"times"
+		]);
+
+		return [
+			new CommandOverload(chaining: false, parameters: [
+				CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET),
+				CommandParameter::enum("action", $action, 0),
+			]),
+
+			new CommandOverload(chaining: false, parameters: [
+				CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET),
+				CommandParameter::enum("action", $action, 0),
+			]),
+
+			new CommandOverload(chaining: false, parameters: [
+				CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET),
+				CommandParameter::enum("action", $action, 0),
+				CommandParameter::standard("text", AvailableCommandsPacket::ARG_TYPE_RAWTEXT),
+			]),
+
+			new CommandOverload(chaining: false, parameters: [
+				CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET),
+				CommandParameter::enum("action", $action, 0),
+				CommandParameter::standard("in", AvailableCommandsPacket::ARG_TYPE_INT),
+				CommandParameter::standard("stay", AvailableCommandsPacket::ARG_TYPE_INT),
+				CommandParameter::standard("out", AvailableCommandsPacket::ARG_TYPE_INT),
+			]),
+		];
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args){

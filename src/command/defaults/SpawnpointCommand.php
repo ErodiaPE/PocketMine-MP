@@ -27,6 +27,9 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\lang\KnownTranslationFactory;
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
+use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
@@ -46,6 +49,23 @@ class SpawnpointCommand extends VanillaCommand{
 			DefaultPermissionNames::COMMAND_SPAWNPOINT_SELF,
 			DefaultPermissionNames::COMMAND_SPAWNPOINT_OTHER
 		]);
+	}
+
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
+		return [
+			new CommandOverload(chaining: false, parameters: []),
+
+			new CommandOverload(chaining: false, parameters: [
+				CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET),
+			]),
+
+			new CommandOverload(chaining: false, parameters: [
+				CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET),
+				CommandParameter::standard("x", AvailableCommandsPacket::ARG_TYPE_FLOAT),
+				CommandParameter::standard("y", AvailableCommandsPacket::ARG_TYPE_FLOAT),
+				CommandParameter::standard("z", AvailableCommandsPacket::ARG_TYPE_FLOAT),
+			]),
+		];
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args){

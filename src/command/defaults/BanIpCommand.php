@@ -27,6 +27,9 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\lang\KnownTranslationFactory;
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
+use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\player\Player;
 use function array_shift;
@@ -43,6 +46,13 @@ class BanIpCommand extends VanillaCommand{
 			KnownTranslationFactory::commands_banip_usage()
 		);
 		$this->setPermission(DefaultPermissionNames::COMMAND_BAN_IP);
+	}
+
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
+		return [new CommandOverload(chaining: false, parameters: [
+			CommandParameter::standard("player", AvailableCommandsPacket::ARG_TYPE_TARGET),
+			CommandParameter::standard("reason", AvailableCommandsPacket::ARG_TYPE_RAWTEXT, 0, true),
+		])];
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args){

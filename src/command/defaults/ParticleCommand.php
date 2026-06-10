@@ -31,6 +31,10 @@ use pocketmine\item\StringToItemParser;
 use pocketmine\item\VanillaItems;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
+use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
+use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\player\Player;
 use pocketmine\utils\Random;
@@ -82,6 +86,58 @@ class ParticleCommand extends VanillaCommand{
 			KnownTranslationFactory::pocketmine_command_particle_usage()
 		);
 		$this->setPermission(DefaultPermissionNames::COMMAND_PARTICLE);
+	}
+
+	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{
+		$particles = [
+			"explode",
+			"hugeexplosion",
+			"hugeexplosionseed",
+			"bubble",
+			"splash",
+			"wake",
+			"water",
+			"crit",
+			"smoke",
+			"spell",
+			"instantspell",
+			"dripwater",
+			"driplava",
+			"townaura",
+			"spore",
+			"portal",
+			"flame",
+			"lava",
+			"reddust",
+			"snowballpoof",
+			"slime",
+			"itembreak",
+			"terrain",
+			"heart",
+			"ink",
+			"droplet",
+			"enchantmenttable",
+			"happyvillager",
+			"angryvillager",
+			"forcefield",
+			"mobflame",
+			"iconcrack",
+			"blockcrack",
+			"blockdust",
+			"sonicexplosion"
+		];
+
+		return [new CommandOverload(chaining: false, parameters: [
+			CommandParameter::enum("Particle", new CommandHardEnum('Particle', $particles), 0, false),
+			CommandParameter::standard("x", AvailableCommandsPacket::ARG_TYPE_FLOAT),
+			CommandParameter::standard("y", AvailableCommandsPacket::ARG_TYPE_FLOAT),
+			CommandParameter::standard("z", AvailableCommandsPacket::ARG_TYPE_FLOAT),
+			CommandParameter::standard("xd", AvailableCommandsPacket::ARG_TYPE_FLOAT),
+			CommandParameter::standard("yd", AvailableCommandsPacket::ARG_TYPE_FLOAT),
+			CommandParameter::standard("zd", AvailableCommandsPacket::ARG_TYPE_FLOAT),
+			CommandParameter::standard("count", AvailableCommandsPacket::ARG_TYPE_INT, 0, true),
+			CommandParameter::standard("data", AvailableCommandsPacket::ARG_TYPE_STRING, 0, true),
+		])];
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args){
