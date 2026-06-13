@@ -36,7 +36,6 @@ use function fclose;
 use function file_get_contents;
 use function fopen;
 use function fwrite;
-use function generateItemTypeIds;
 use function is_dir;
 use function mkdir;
 use function strtoupper;
@@ -49,9 +48,7 @@ function constifyMcId(string $id) : string{
 	return strtoupper(explode(":", $id, 2)[1]);
 }
 
-/**
- * @return resource
- */
+/** @return resource */
 function safe_fopen(string $file, string $flags){
 	$dir = dirname($file);
 	if(!@mkdir($dir, recursive: true) && !is_dir($dir)){
@@ -111,6 +108,6 @@ if($raw === false){
 
 $dictionary = ItemTypeDictionaryFromDataHelper::loadFromString($raw);
 $blockItemIdMap = BlockItemIdMap::getInstance();
-generateItemTypeIds($dictionary, $blockItemIdMap);
+generateItemIds($dictionary, $blockItemIdMap);
 
 echo "Done. Don't forget to run CS fixup after generating code.\n";

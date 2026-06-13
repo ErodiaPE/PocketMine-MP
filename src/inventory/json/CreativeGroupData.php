@@ -31,7 +31,7 @@ final class CreativeGroupData{
 	/** @required */
 	public ?ItemStackData $group_icon;
 	/**
-	 * @var ItemStackData[]
+	 * @var \pocketmine\crafting\json\ItemStackData[]
 	 * @required
 	 */
 	public array $items;

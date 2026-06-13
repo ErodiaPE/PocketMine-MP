@@ -46,6 +46,7 @@ use function file_get_contents;
 use function fopen;
 use function fwrite;
 use function is_dir;
+use function is_string;
 use function ksort;
 use function mb_strtoupper;
 use function mkdir;
@@ -124,9 +125,7 @@ final class $shortName{
 HEADER;
 }
 
-/**
- * @return resource
- */
+/** @return resource */
 function safe_fopen(string $file, string $flags){
 	$dir = dirname($file);
 	if(!@mkdir($dir, recursive: true) && !is_dir($dir)){

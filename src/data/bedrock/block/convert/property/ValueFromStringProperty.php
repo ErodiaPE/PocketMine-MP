@@ -28,6 +28,7 @@ use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use function array_keys;
 use function array_map;
+use function strval;
 
 /**
  * @phpstan-template TBlock of object
