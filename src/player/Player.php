@@ -1481,7 +1481,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	}
 
 	protected function move(float $dx, float $dy, float $dz) : void{
-		$collisions = (bool) $this->tweaks->getNested("performance.collisions", true);
+		$collisions = (bool) Server::getInstance()->getPokkit()->getNested("performance.collisions", true);
 		if($collisions) {
 			parent::move($dx, $dy, $dz);
 			return; // Use the default entity collision handling
@@ -1522,7 +1522,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 
 		$this->getWorld()->onEntityMoved($this);
 
-		$blockIntersections = (bool) $this->tweaks->getNested("performance.block-intersections", true);
+		$blockIntersections = (bool) $this->getServer()->getPokkit()->getNested("performance.block-intersections", true);
 		if($blockIntersections) {
 			$this->checkBlockIntersections();
 		}
