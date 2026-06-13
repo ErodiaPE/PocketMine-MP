@@ -43,7 +43,7 @@ trait FallableTrait{
 	abstract protected function getPosition() : Position;
 
 	public function onNearbyBlockChange() : void{
-		$tweaks = Server::getInstance()->getTweaks();
+		$tweaks = Server::getInstance()->getPokkit();
 		$fallingBlocks = $tweaks->getNested("performance.falling-blocks", true);
 		if(!$fallingBlocks){
 			return; // Falling blocks are disabled

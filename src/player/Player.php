@@ -1608,7 +1608,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 				$this->fireTicks = 1;
 			}
 
-			$entityCollisions = (bool) $this->getServer()->getTweaks()->getNested("performance.entity-collisions", true);
+			$entityCollisions = (bool) $this->getServer()->getPokkit()->getNested("performance.entity-collisions", true);
 			if(!$this->isSpectator() && $this->isAlive() && $entityCollisions){
 				Timings::$playerCheckNearEntities->startTiming();
 				$this->checkNearEntities();

@@ -296,7 +296,7 @@ class Server{
 	private QueryInfo $queryInfo;
 
 	private ServerConfigGroup $configGroup;
-	private Config $tweaks;
+	private Config $pokkit;
 
 	/** @var Player[] */
 	private array $playerList = [];
@@ -667,8 +667,8 @@ class Server{
 		return $this->getPlayerByRawUUID($uuid->getBytes());
 	}
 
-	public function getTweaks() : Config{
-		return $this->tweaks;
+	public function getPokkit() : Config{
+		return $this->pokkit;
 	}
 
 	public function getConfigGroup() : ServerConfigGroup{
@@ -814,13 +814,13 @@ class Server{
 			$this->dataPath = realpath($dataPath) . DIRECTORY_SEPARATOR;
 			$this->pluginPath = realpath($pluginPath) . DIRECTORY_SEPARATOR;
 
-			$this->logger->info("Loading tweaks configuration");
-			$tweaksYmlPath = Path::join($this->dataPath, "tweaks.yml");
-			if(!file_exists($tweaksYmlPath)){
-				$content = Filesystem::fileGetContents(Path::join(\pocketmine\RESOURCE_PATH, "tweaks.yml"));
-				@file_put_contents($tweaksYmlPath, $content);
+			$this->logger->info("Loading pokkit configuration");
+			$pokkitYmlPath = Path::join($this->dataPath, "pokkit.yml");
+			if(!file_exists($pokkitYmlPath)){
+				$content = Filesystem::fileGetContents(Path::join(\pocketmine\RESOURCE_PATH, "pokkit.yml"));
+				@file_put_contents($pokkitYmlPath, $content);
 			}
-			$this->tweaks = new Config($tweaksYmlPath, Config::YAML, []);
+			$this->pokkit = new Config($pokkitYmlPath, Config::YAML, []);
 
 			$this->logger->info("Loading server configuration");
 			$pocketmineYmlPath = Path::join($this->dataPath, "pocketmine.yml");
