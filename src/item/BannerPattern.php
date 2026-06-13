@@ -30,18 +30,10 @@ class BannerPattern extends Item{
 		return 1;
 	}
 
-	/**
-	 * @return BannerPatternType
-	 */
 	public function getType() : BannerPatternType{
 		return $this->type;
 	}
 
-	/**
-	 * @param BannerPatternType $type
-	 *
-	 * @return BannerPattern
-	 */
 	public function setType(BannerPatternType $type) : BannerPattern{
 		$this->type = $type;
 		return $this;

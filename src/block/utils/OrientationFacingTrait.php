@@ -33,16 +33,11 @@ trait OrientationFacingTrait{
 		$w->enum($this->facing);
 	}
 
-	/**
-	 * @return Orientation
-	 */
 	public function getOrientation() : Orientation{
 		return $this->facing;
 	}
 
 	/**
-	 * @param Orientation $orientation
-	 *
 	 * @return OrientationFacingTrait|Crafter
 	 */
 	public function setOrientation(Orientation $orientation) : self{

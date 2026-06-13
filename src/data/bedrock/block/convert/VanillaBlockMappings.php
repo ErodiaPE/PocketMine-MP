@@ -164,6 +164,7 @@ use pocketmine\math\Facing;
 use function array_map;
 use function min;
 use function range;
+use function strtolower;
 
 /**
  * @internal

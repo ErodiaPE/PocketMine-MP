@@ -32,6 +32,7 @@ use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
+use function abs;
 
 class Dispenser extends Opaque implements AnyFacing{
 	use AnyFacingTrait {
@@ -49,24 +50,10 @@ class Dispenser extends Opaque implements AnyFacing{
 		return $this->triggered;
 	}
 
-	/**
-	 * @param bool $triggered
-	 */
 	public function setTriggered(bool $triggered) : void{
 		$this->triggered = $triggered;
 	}
 
-	/**
-	 * @param BlockTransaction $tx
-	 * @param Item             $item
-	 * @param Block            $blockReplace
-	 * @param Block            $blockClicked
-	 * @param int              $face
-	 * @param Vector3          $clickVector
-	 * @param Player|null      $player
-	 *
-	 * @return bool
-	 */
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		if ($player !== null) {
 			$x = abs($player->getLocation()->getFloorX() - $this->getPosition()->getX());
@@ -83,15 +70,6 @@ class Dispenser extends Opaque implements AnyFacing{
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
-	/**
-	 * @param Item        $item
-	 * @param int         $face
-	 * @param Vector3     $clickVector
-	 * @param Player|null $player
-	 * @param array       $returnedItems
-	 *
-	 * @return bool
-	 */
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if ($player !== null) {
 			$tile = $this->position->getWorld()->getTile($this->position);

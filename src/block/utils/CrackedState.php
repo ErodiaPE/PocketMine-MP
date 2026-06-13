@@ -24,6 +24,8 @@ declare(strict_types=1);
 namespace pocketmine\block\utils;
 
 use pocketmine\utils\LegacyEnumShimTrait;
+use function array_search;
+use function count;
 
 /**
  * TODO: These tags need to be removed once we get rid of LegacyEnumShimTrait (PM6)

@@ -28,6 +28,8 @@ use pocketmine\player\Player;
 use pocketmine\world\particle\SmashAttackGroundDustParticle;
 use pocketmine\world\sound\MaceHeavySmashGroundSound;
 use pocketmine\world\sound\MaceSmashGroundSound;
+use function abs;
+use function min;
 
 class Mace extends Tool{
 
@@ -35,9 +37,6 @@ class Mace extends Tool{
 		return 501;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getAttackPoints() : int{
 		return 5;
 	}
@@ -48,8 +47,6 @@ class Mace extends Tool{
 
 	/**
 	 * @param Player $entity
-	 *
-	 * @return float
 	 */
 	public function getAttackDamage(Entity $entity) : float{
 
@@ -70,12 +67,6 @@ class Mace extends Tool{
 		return $base + $bonus;
 	}
 
-	/**
-	 * @param Entity $entity
-	 * @param float  $damage
-	 *
-	 * @return void
-	 */
 	public function onPostAttack(Entity $entity, float $damage) : void{
 		if ($damage >= 7) {
 			$entity->getWorld()->addParticle($entity->getPosition(), new SmashAttackGroundDustParticle());

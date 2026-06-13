@@ -2,7 +2,7 @@
 
 /*
  *
- * ____            _        _   __  __ _                  __  __ ____
+ *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
  * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
@@ -34,10 +34,14 @@ use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\player\Player;
 use pocketmine\world\sound\VaultEjectSound;
-use pocketmine\world\sound\XpPickupSound;
 use pocketmine\world\World;
 use function array_map;
+use function array_rand;
+use function array_shift;
+use function array_values;
+use function count;
 use function in_array;
+use function mt_rand;
 
 // PocketMine n'a pas forcément le son VAULT_EJECT, XpPickup s'en rapproche visuellement
 
@@ -84,10 +88,6 @@ class Vault extends Spawnable {
 	private array $connectedPlayers = [];
 	private float $connectedParticlesRange = self::DEFAULT_CONNECTED_PARTICLES_RANGE;
 
-	/**
-	 * @param World   $world
-	 * @param Vector3 $pos
-	 */
 	public function __construct(World $world, Vector3 $pos){
 		parent::__construct($world, $pos);
 		$this->keyItem = VanillaItems::TRIAL_KEY();
@@ -140,30 +140,17 @@ class Vault extends Spawnable {
 		}
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function writeSaveData(CompoundTag $nbt) : void{
 		$nbt->setTag(self::TAG_CONFIG, $this->createConfigTag());
 		$nbt->setTag(self::TAG_SERVER_DATA, $this->createServerDataTag());
 		$nbt->setTag(self::DATA, $this->createSharedDataTag());
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
 		$nbt->setTag(self::TAG_CONFIG, $this->createConfigTag());
 		$nbt->setTag(self::DATA, $this->createSharedDataTag());
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function onUpdate() : bool{
 		if($this->closed) return false;
 
@@ -244,12 +231,6 @@ class Vault extends Spawnable {
 		return true;
 	}
 
-	/**
-	 * @param Player $player
-	 * @param Item   $itemUsed
-	 *
-	 * @return bool
-	 */
 	public function tryOpen(Player $player, Item $itemUsed) : bool{
 		$uuid = $player->getUniqueId()->toString();
 		$block = $this->getBlock();
@@ -277,11 +258,6 @@ class Vault extends Spawnable {
 		return true;
 	}
 
-	/**
-	 * @param bool $ominous
-	 *
-	 * @return void
-	 */
 	private function simulateLootRoll(bool $ominous) : void{
 		$this->itemsToEject = [];
 		$count = mt_rand(2, 4);
@@ -304,19 +280,11 @@ class Vault extends Spawnable {
 		$this->setDisplayItem($this->itemsToEject[0]);
 	}
 
-	/**
-	 * @param Item $item
-	 *
-	 * @return void
-	 */
 	public function setDisplayItem(Item $item) : void{
 		$this->displayItem = clone $item;
 		$this->setDirty();
 	}
 
-	/**
-	 * @return CompoundTag
-	 */
 	private function createConfigTag() : CompoundTag{
 		return CompoundTag::create()
 			->setString(self::TAG_LOOT_TABLE, $this->lootTable)
@@ -326,9 +294,6 @@ class Vault extends Spawnable {
 			->setString(self::TAG_OVERRIDE_LOOT_TABLE_TO_DISPLAY, $this->overrideLootTableToDisplay);
 	}
 
-	/**
-	 * @return CompoundTag
-	 */
 	private function createServerDataTag() : CompoundTag{
 		return CompoundTag::create()
 			->setTag(self::TAG_REWARDED_PLAYERS, new ListTag(array_map(fn($uid) => new StringTag($uid), $this->rewardedPlayers)))
@@ -337,9 +302,6 @@ class Vault extends Spawnable {
 			->setInt(self::TAG_TOTAL_EJECTIONS_NEEDED, $this->totalEjectionsNeeded);
 	}
 
-	/**
-	 * @return CompoundTag
-	 */
 	private function createSharedDataTag() : CompoundTag{
 		$nbt = CompoundTag::create()
 			->setTag(self::TAG_CONNECTED_PLAYERS, new ListTag(array_map(fn($uid) => new StringTag($uid), $this->connectedPlayers)))

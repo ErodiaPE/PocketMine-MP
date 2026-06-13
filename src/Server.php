@@ -667,9 +667,6 @@ class Server{
 		return $this->getPlayerByRawUUID($uuid->getBytes());
 	}
 
-	/**
-	 * @return Config
-	 */
 	public function getTweaks() : Config{
 		return $this->tweaks;
 	}

@@ -41,6 +41,7 @@ use pocketmine\world\World;
 use function is_int;
 use function mb_strtoupper;
 use function strtolower;
+use function ucfirst;
 
 /**
  * @internal

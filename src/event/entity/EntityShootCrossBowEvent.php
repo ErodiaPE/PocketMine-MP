@@ -29,6 +29,7 @@ use pocketmine\event\Cancellable;
 use pocketmine\event\CancellableTrait;
 use pocketmine\item\Item;
 use function count;
+use function in_array;
 
 /**
  * @phpstan-extends EntityEvent<Living>
@@ -74,16 +75,10 @@ class EntityShootCrossBowEvent extends EntityEvent implements Cancellable{
 		$this->projectiles = $projectiles;
 	}
 
-	/**
-	 * @return float
-	 */
 	public function getForce() : float{
 		return $this->force;
 	}
 
-	/**
-	 * @param float $force
-	 */
 	public function setForce(float $force) : void{
 		$this->force = $force;
 	}

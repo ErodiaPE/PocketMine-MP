@@ -55,11 +55,6 @@ class Shelf extends Spawnable implements Container {
 		}
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
 		$items = [];
 		foreach($this->getRealInventory()->getContents() as $slot => $item){

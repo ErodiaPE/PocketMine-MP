@@ -25,15 +25,7 @@ namespace pocketmine\block\utils;
 
 interface OrientationFacing{
 
-	/**
-	 * @return Orientation
-	 */
 	public function getOrientation() : Orientation;
 
-	/**
-	 * @param Orientation $orientation
-	 *
-	 * @return self
-	 */
 	public function setOrientation(Orientation $orientation) : self;
 }

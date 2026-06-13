@@ -43,10 +43,6 @@ class Crafter extends Spawnable implements Container, Nameable{
 	private int $ticksRemaining = 0;
 	private int $disabledSlots = 0;
 
-	/**
-	 * @param World   $world
-	 * @param Vector3 $pos
-	 */
 	public function __construct(World $world, Vector3 $pos){
 		parent::__construct($world, $pos);
 		$this->inventory = new CrafterInventory($this->position);
@@ -60,23 +56,13 @@ class Crafter extends Spawnable implements Container, Nameable{
 		));
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	public function readSaveData(CompoundTag $nbt) : void{
 		$this->loadItems($nbt);
 		$this->loadName($nbt);
 		$this->disabledSlots = $nbt->getShort(self::TAG_DISABLED_SLOTS, 0);
-		$this->ticksRemaining =  $nbt->getInt(self::TAG_CRAFTING_TICKS_REMAINING, 0);
+		$this->ticksRemaining = $nbt->getInt(self::TAG_CRAFTING_TICKS_REMAINING, 0);
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function writeSaveData(CompoundTag $nbt) : void{
 		$this->saveItems($nbt);
 		$this->saveName($nbt);
@@ -91,9 +77,6 @@ class Crafter extends Spawnable implements Container, Nameable{
 		$nbt->setInt(self::TAG_CRAFTING_TICKS_REMAINING, $this->ticksRemaining);
 	}
 
-	/**
-	 * @return void
-	 */
 	public function close() : void{
 		if(!$this->closed){
 			$this->inventory->removeAllViewers();
@@ -102,57 +85,31 @@ class Crafter extends Spawnable implements Container, Nameable{
 		}
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getDefaultName() : string{
 		return "Crafter";
 	}
 
-	/**
-	 * @return CrafterInventory
-	 */
 	public function getInventory() : CrafterInventory{
 		return $this->inventory;
 	}
 
-	/**
-	 * @return CrafterInventory
-	 */
 	public function getRealInventory() : CrafterInventory{
 		return $this->inventory;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getTicksRemaining() : int{
 		return $this->ticksRemaining;
 	}
 
-	/**
-	 * @param int $ticksRemaining
-	 */
 	public function setTicksRemaining(int $ticksRemaining) : void{
 		$this->ticksRemaining = $ticksRemaining;
 		$this->setDirty();
 	}
 
-	/**
-	 * @param int $slot
-	 *
-	 * @return bool
-	 */
 	public function isLocked(int $slot) : bool{
 		return ($this->disabledSlots & (1 << $slot)) != 0;
 	}
 
-	/**
-	 * @param int  $slot
-	 * @param bool $state
-	 *
-	 * @return void
-	 */
 	public function setLocked(int $slot, bool $state = true) : void{
 		$this->disabledSlots = !$state ? $this->disabledSlots ^ (1 << $slot) : $this->disabledSlots | (1 << $slot);
 		$this->setDirty();

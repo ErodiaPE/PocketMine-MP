@@ -33,31 +33,19 @@ class CopperGolem extends Spawnable{
 	private CopperGolemPose $pose = CopperGolemPose::STANDING;
 	private bool $isMovable = false;
 
-	/**
-	 * @return CopperGolemPose
-	 */
 	public function getPose() : CopperGolemPose{
 		return $this->pose;
 	}
 
-	/**
-	 * @param CopperGolemPose $pose
-	 */
 	public function setPose(CopperGolemPose $pose) : void{
 		$this->pose = $pose;
 		$this->setDirty();
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isMovable() : bool{
 		return $this->isMovable;
 	}
 
-	/**
-	 * @param bool $isMovable
-	 */
 	public function setIsMovable(bool $isMovable) : void{
 		$this->isMovable = $isMovable;
 		$this->setDirty();
@@ -65,26 +53,16 @@ class CopperGolem extends Spawnable{
 
 	public function readSaveData(CompoundTag $nbt) : void{
 		$this->pose = CopperGolemPose::from($nbt->getInt(self::TAG_POSE, 0));
-		$this->isMovable = (bool)$nbt->getByte(self::TAG_IS_MOVABLE, 0);
+		$this->isMovable = (bool) $nbt->getByte(self::TAG_IS_MOVABLE, 0);
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function writeSaveData(CompoundTag $nbt) : void{
 		$nbt->setInt(self::TAG_POSE, $this->pose->value);
-		$nbt->setByte(self::TAG_IS_MOVABLE, (int)$this->isMovable);
+		$nbt->setByte(self::TAG_IS_MOVABLE, (int) $this->isMovable);
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
 		$nbt->setInt(self::TAG_POSE, $this->pose->value);
-		$nbt->setByte(self::TAG_IS_MOVABLE, (int)$this->isMovable);
+		$nbt->setByte(self::TAG_IS_MOVABLE, (int) $this->isMovable);
 	}
 }

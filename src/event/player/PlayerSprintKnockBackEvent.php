@@ -47,15 +47,15 @@ class PlayerSprintKnockBackEvent extends PlayerEvent implements Cancellable{
 		$this->verticalKnockBackLimit = $verticalKnockBackLimit;
 	}
 
-	public function getAttacker(): Player {
+	public function getAttacker() : Player {
 		return $this->player;
 	}
 
-	public function getTarget(): Entity {
+	public function getTarget() : Entity {
 		return $this->target;
 	}
 
-	public function getKnockBack(): float {
+	public function getKnockBack() : float {
 		return $this->knockBack;
 	}
 

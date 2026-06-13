@@ -24,6 +24,10 @@ declare(strict_types=1);
 namespace pocketmine\build\generate_stuff;
 
 use function dirname;
+use function fclose;
+use function proc_close;
+use function proc_open;
+use function stream_get_contents;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -43,7 +47,7 @@ function send(string $path, string $cwd = null) {
 	);
 
 	$output = stream_get_contents($pipes[1]);
-	$error  = stream_get_contents($pipes[2]);
+	$error = stream_get_contents($pipes[2]);
 
 	fclose($pipes[1]);
 	fclose($pipes[2]);

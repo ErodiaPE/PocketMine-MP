@@ -38,18 +38,18 @@ class BeeHive extends Opaque implements HorizontalFacing
 
 	protected int $honeyLevel = 0;
 
-	protected function describeBlockOnlyState(RuntimeDataDescriber $w): void
+	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void
 	{
 		$this->describeFacingState($w);
 		$w->boundedIntAuto(0, 5, $this->honeyLevel);
 	}
 
-	public function getHoneyLevel(): int
+	public function getHoneyLevel() : int
 	{
 		return $this->honeyLevel;
 	}
 
-	public function setHoneyLevel(int $honeyLevel): self
+	public function setHoneyLevel(int $honeyLevel) : self
 	{
 		$this->honeyLevel = $honeyLevel;
 		return $this;

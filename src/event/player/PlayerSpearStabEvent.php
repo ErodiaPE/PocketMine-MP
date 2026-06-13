@@ -41,9 +41,6 @@ class PlayerSpearStabEvent extends PlayerEvent implements Cancellable{
 		$this->spear = $spear;
 	}
 
-	/**
-	 * @return Spear
-	 */
 	public function getSpear() : Spear{
 		return $this->spear;
 	}

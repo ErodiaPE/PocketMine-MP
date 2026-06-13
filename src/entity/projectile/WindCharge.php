@@ -30,6 +30,9 @@ use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 use pocketmine\world\particle\WindExplosionParticle;
 use pocketmine\world\sound\WindChargeBurstSound;
+use function max;
+use function min;
+use function sqrt;
 
 class WindCharge extends Throwable{
 	public static function getNetworkTypeId() : string{ return EntityIds::WIND_CHARGE_PROJECTILE; }
@@ -40,25 +43,14 @@ class WindCharge extends Throwable{
 
 	protected function getInitialGravity() : float{ return 0.00; }
 
-	/**
-	 * @return float
-	 */
-	public function getBurstRadius(): float{
+	public function getBurstRadius() : float{
 		return 2;
 	}
 
-	/**
-	 * @return float
-	 */
 	public function getKnockbackStrength() : float{
 		return 0.2;
 	}
 
-	/**
-	 * @param ProjectileHitEvent $event
-	 *
-	 * @return void
-	 */
 	protected function onHit(ProjectileHitEvent $event) : void{
 		$world = $this->getWorld();
 		$radius = $this->getBurstRadius();
@@ -81,11 +73,6 @@ class WindCharge extends Throwable{
 		$this->close();
 	}
 
-	/**
-	 * @param Entity $entity
-	 *
-	 * @return void
-	 */
 	protected function knockBack(Entity $entity) : void{
 
 		$from = $this->getLocation();

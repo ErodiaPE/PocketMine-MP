@@ -1,5 +1,24 @@
 <?php
 
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+ */
+
 declare(strict_types=1);
 
 namespace pocketmine\block;
@@ -19,26 +38,12 @@ class Vault extends Transparent implements HorizontalFacing{
 	private bool $ominous = false;
 	private VaultState $state = VaultState::INACTIVE;
 
-	/**
-	 * @param RuntimeDataDescriber $w
-	 *
-	 * @return void
-	 */
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->horizontalFacing($this->facing);
 		$w->enum($this->state);
 		$w->bool($this->ominous);
 	}
 
-	/**
-	 * @param Item        $item
-	 * @param int         $face
-	 * @param Vector3     $clickVector
-	 * @param Player|null $player
-	 * @param array       $returnedItems
-	 *
-	 * @return bool
-	 */
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if($player === null) return false;
 
@@ -52,30 +57,18 @@ class Vault extends Transparent implements HorizontalFacing{
 		return false;
 	}
 
-	/**
-	 * @return VaultState
-	 */
 	public function getState() : VaultState{
 		return $this->state;
 	}
 
-	/**
-	 * @param VaultState $state
-	 */
 	public function setState(VaultState $state) : void{
 		$this->state = $state;
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isOminous() : bool{
 		return $this->ominous;
 	}
 
-	/**
-	 * @param bool $ominous
-	 */
 	public function setOminous(bool $ominous) : void{
 		$this->ominous = $ominous;
 	}

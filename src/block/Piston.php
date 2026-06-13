@@ -35,17 +35,6 @@ use function abs;
 class Piston extends Transparent implements AnyFacing{
 	use AnyFacingTrait;
 
-	/**
-	 * @param BlockTransaction $tx
-	 * @param Item             $item
-	 * @param Block            $blockReplace
-	 * @param Block            $blockClicked
-	 * @param int              $face
-	 * @param Vector3          $clickVector
-	 * @param Player|null      $player
-	 *
-	 * @return bool
-	 */
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		if ($player !== null) {
 			$x = abs($player->getLocation()->getFloorX() - $this->getPosition()->getX());

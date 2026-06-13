@@ -53,6 +53,8 @@ use pocketmine\item\SplashPotion;
 use pocketmine\item\SuspiciousStew;
 use pocketmine\item\VanillaItems as Items;
 use pocketmine\nbt\tag\CompoundTag;
+use function str_replace;
+use function strtolower;
 
 final class ItemSerializerDeserializerRegistrar{
 

@@ -36,29 +36,14 @@ class Composter extends Transparent{
 		$w->boundedIntAuto(0, 8, $this->fillLevel);
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getFillLevel() : int{
 		return $this->fillLevel;
 	}
 
-	/**
-	 * @param int $fillLevel
-	 */
 	public function setFillLevel(int $fillLevel) : void{
 		$this->fillLevel = $fillLevel;
 	}
 
-	/**
-	 * @param Item        $item
-	 * @param int         $face
-	 * @param Vector3     $clickVector
-	 * @param Player|null $player
-	 * @param array       $returnedItems
-	 *
-	 * @return bool
-	 */
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		$this->fillLevel = ($this->fillLevel + 1) % 8;
 		return false;

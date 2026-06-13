@@ -36,24 +36,13 @@ class CalibratedSculkSensor extends SculkSensor
 		describeBlockOnlyState as describeFacing;
 	}
 
-	protected function describeBlockOnlyState(RuntimeDataDescriber $w): void
+	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void
 	{
 		$this->describeFacing($w);
 		parent::describeBlockOnlyState($w);
 	}
 
-	/**
-	 * @param BlockTransaction $tx
-	 * @param Item             $item
-	 * @param Block            $blockReplace
-	 * @param Block            $blockClicked
-	 * @param int              $face
-	 * @param Vector3          $clickVector
-	 * @param Player|null      $player
-	 *
-	 * @return bool
-	 */
-	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null): bool
+	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool
 	{
 		if ($player !== null) {
 			$this->facing = $player->getHorizontalFacing();

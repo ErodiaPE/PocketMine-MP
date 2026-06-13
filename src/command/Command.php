@@ -30,8 +30,6 @@ use pocketmine\command\utils\CommandException;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\lang\Translatable;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
-use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
-use pocketmine\network\mcpe\protocol\types\command\CommandEnumConstraint;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\PermissionManager;
@@ -95,9 +93,6 @@ abstract class Command{
 	abstract public function execute(CommandSender $sender, string $commandLabel, array $args);
 
 	/**
-	 * @param array $hardcodedEnums
-	 * @param array $softEnums
-	 *
 	 * @return CommandOverload[]
 	 */
 	public function buildOverloads(array &$hardcodedEnums, array &$softEnums) : array{

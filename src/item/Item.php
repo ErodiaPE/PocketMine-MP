@@ -657,20 +657,9 @@ class Item implements \JsonSerializable{
 		return false;
 	}
 
-	/**
-	 * @param Player $player
-	 *
-	 * @return void
-	 */
 	public function whileUsing(Player $player) : void{
 	}
 
-	/**
-	 * @param Entity $entity
-	 * @param float  $damage
-	 *
-	 * @return void
-	 */
 	public function onPostAttack(Entity $entity, float $damage) : void{
 	}
 

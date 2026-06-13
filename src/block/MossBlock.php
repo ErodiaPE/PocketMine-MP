@@ -30,6 +30,8 @@ use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\particle\BoneMealParticle;
+use function abs;
+use function mt_getrandmax;
 use function mt_rand;
 
 class MossBlock extends Opaque{

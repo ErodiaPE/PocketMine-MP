@@ -33,14 +33,13 @@ use pocketmine\item\LegacyStringToItemParserException;
 use pocketmine\item\StringToItemParser;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
-use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
-use pocketmine\network\mcpe\protocol\types\command\CommandEnumConstraint;
 use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\permission\DefaultPermissionNames;
 use pocketmine\utils\TextFormat;
 use function count;
+use function mb_strtolower;
 use function min;
 
 class ClearCommand extends VanillaCommand{
@@ -67,7 +66,6 @@ class ClearCommand extends VanillaCommand{
 			CommandParameter::standard("maxCount", AvailableCommandsPacket::ARG_TYPE_INT, 0, true),
 		])];
 	}
-
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args){
 		if(count($args) > 3){

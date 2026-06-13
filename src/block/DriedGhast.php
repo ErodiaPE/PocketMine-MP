@@ -38,18 +38,18 @@ class DriedGhast extends Transparent implements HorizontalFacing
 
 	protected int $hydratationLevel = 0;
 
-	protected function describeBlockOnlyState(RuntimeDataDescriber $w): void
+	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void
 	{
 		$this->describeFacingState($w);
 		$w->boundedIntAuto(0, 3, $this->hydratationLevel);
 	}
 
-	public function getHydratationLevel(): int
+	public function getHydratationLevel() : int
 	{
 		return $this->hydratationLevel;
 	}
 
-	public function setHydratationLevel(int $hydratationLevel): self
+	public function setHydratationLevel(int $hydratationLevel) : self
 	{
 		$this->hydratationLevel = $hydratationLevel;
 		return $this;

@@ -44,37 +44,16 @@ class LeafLitter extends Flowable implements Ageable, HorizontalFacing{
 
 	public const MAX_AGE = 7;
 
-	/**
-	 * @param RuntimeDataDescriber $w
-	 *
-	 * @return void
-	 */
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->facing($this->facing);
 		$w->boundedIntAuto(0, 7, $this->age);
 	}
 
-	/**
-	 * @param Block $block
-	 *
-	 * @return bool
-	 */
 	private function canBeSupportedAt(Block $block) : bool{
 		$supportBlock = $block->getSide(Facing::DOWN);
 		return $supportBlock->hasTypeTag(BlockTypeTags::DIRT) || $supportBlock->hasTypeTag(BlockTypeTags::MUD);
 	}
 
-	/**
-	 * @param BlockTransaction $tx
-	 * @param Item             $item
-	 * @param Block            $blockReplace
-	 * @param Block            $blockClicked
-	 * @param int              $face
-	 * @param Vector3          $clickVector
-	 * @param Player|null      $player
-	 *
-	 * @return bool
-	 */
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		if ($player !== null) {
 			$this->facing = Facing::opposite($player->getHorizontalFacing());
@@ -82,15 +61,6 @@ class LeafLitter extends Flowable implements Ageable, HorizontalFacing{
 		return parent::place($tx, $item, $blockReplace, $blockClicked, $face, $clickVector, $player);
 	}
 
-	/**
-	 * @param Item        $item
-	 * @param int         $face
-	 * @param Vector3     $clickVector
-	 * @param Player|null $player
-	 * @param array       $returnedItems
-	 *
-	 * @return bool
-	 */
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if ($item->equals($this->asItem(), false, false)) {
 			if ($this->age < 3) {
@@ -108,9 +78,6 @@ class LeafLitter extends Flowable implements Ageable, HorizontalFacing{
 		return false;
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function canBeReplaced() : bool{
 		return true;
 	}

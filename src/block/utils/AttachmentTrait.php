@@ -32,16 +32,10 @@ trait AttachmentTrait{
 		$w->enum($this->attachment);
 	}
 
-	/**
-	 * @return Attachment
-	 */
 	public function getAttachment() : Attachment{
 		return $this->attachment;
 	}
 
-	/**
-	 * @param Attachment $attachment
-	 */
 	public function setAttachment(Attachment $attachment) : void{
 		$this->attachment = $attachment;
 	}

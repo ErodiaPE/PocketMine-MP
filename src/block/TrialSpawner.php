@@ -34,30 +34,18 @@ class TrialSpawner extends MonsterSpawner{
 		$w->boundedIntAuto(0, 5, $this->state);
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isOminous() : bool{
 		return $this->ominous;
 	}
 
-	/**
-	 * @param bool $ominous
-	 */
 	public function setOminous(bool $ominous) : void{
 		$this->ominous = $ominous;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getState() : int{
 		return $this->state;
 	}
 
-	/**
-	 * @param int $state
-	 */
 	public function setState(int $state) : void{
 		$this->state = $state;
 	}

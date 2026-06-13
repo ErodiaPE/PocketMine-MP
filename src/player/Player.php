@@ -362,9 +362,6 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 		parent::__construct($spawnLocation, $this->playerInfo->getSkin(), $namedtag);
 	}
 
-	/**
-	 * @return SurvivalBlockBreakHandler|null
-	 */
 	public function getBlockBreakHandler() : ?SurvivalBlockBreakHandler{
 		return $this->blockBreakHandler;
 	}
@@ -888,13 +885,13 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 			$this->usedChunks[$index] = UsedChunkStatus::REQUESTED_GENERATION;
 			$this->activeChunkGenerationRequests[$index] = true;
 			unset($this->loadQueue[$index]);
-			$world->registerChunkLoader($this->chunkLoader, (int)$X, (int)$Z, true);
-			$world->registerChunkListener($this, (int)$X, (int)$Z);
+			$world->registerChunkLoader($this->chunkLoader, (int) $X, (int) $Z, true);
+			$world->registerChunkListener($this, (int) $X, (int) $Z);
 			if(isset($this->tickingChunks[$index])){
-				$world->registerTickingChunk($this->chunkTicker, (int)$X, (int)$Z);
+				$world->registerTickingChunk($this->chunkTicker, (int) $X, (int) $Z);
 			}
 
-			$world->requestChunkPopulation((int)$X, (int)$Z, $this->chunkLoader)->onCompletion(
+			$world->requestChunkPopulation((int) $X, (int) $Z, $this->chunkLoader)->onCompletion(
 				function() use ($X, $Z, $index, $world) : void{
 					if(!$this->isConnected() || !isset($this->usedChunks[$index]) || $world !== $this->getWorld()){
 						return;
@@ -908,10 +905,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 					unset($this->activeChunkGenerationRequests[$index]);
 					$this->usedChunks[$index] = UsedChunkStatus::REQUESTED_SENDING;
 
-					$this->getNetworkSession()->startUsingChunk((int)$X, (int)$Z, function() use ($X, $Z, $index) : void{
+					$this->getNetworkSession()->startUsingChunk((int) $X, (int) $Z, function() use ($X, $Z, $index) : void{
 						$this->usedChunks[$index] = UsedChunkStatus::SENT;
 						if($this->spawnChunkLoadCount === -1){
-							$this->spawnEntitiesOnChunk((int)$X, (int)$Z);
+							$this->spawnEntitiesOnChunk((int) $X, (int) $Z);
 						}elseif($this->spawnChunkLoadCount++ === $this->spawnThreshold){
 							$this->spawnChunkLoadCount = -1;
 
@@ -919,7 +916,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 
 							$this->getNetworkSession()->notifyTerrainReady();
 						}
-						(new PlayerPostChunkSendEvent($this, (int)$X, (int)$Z))->call();
+						(new PlayerPostChunkSendEvent($this, (int) $X, (int) $Z))->call();
 					});
 				},
 				static function() : void{
@@ -1478,7 +1475,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	}
 
 	protected function move(float $dx, float $dy, float $dz) : void{
-		$collisions = (bool)$this->tweaks->getNested("performance.collisions", true);
+		$collisions = (bool) $this->tweaks->getNested("performance.collisions", true);
 		if($collisions) {
 			parent::move($dx, $dy, $dz);
 			return; // Use the default entity collision handling
@@ -1519,7 +1516,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 
 		$this->getWorld()->onEntityMoved($this);
 
-		$blockIntersections = (bool)$this->tweaks->getNested("performance.block-intersections", true);
+		$blockIntersections = (bool) $this->tweaks->getNested("performance.block-intersections", true);
 		if($blockIntersections) {
 			$this->checkBlockIntersections();
 		}
@@ -1596,7 +1593,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 				$this->fireTicks = 1;
 			}
 
-			$entityCollisions = (bool)$this->tweaks->getNested("performance.entity-collisions", true);
+			$entityCollisions = (bool) $this->tweaks->getNested("performance.entity-collisions", true);
 			if(!$this->isSpectator() && $this->isAlive() && $entityCollisions){
 				Timings::$playerCheckNearEntities->startTiming();
 				$this->checkNearEntities();

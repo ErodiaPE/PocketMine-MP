@@ -31,24 +31,14 @@ class SculkCatalyst extends Spawnable{
 	private bool $isMovable = false;
 
 	public function readSaveData(CompoundTag $nbt) : void{
-		$this->isMovable = (bool)$nbt->getByte(self::TAG_IS_MOVABLE, 0);
+		$this->isMovable = (bool) $nbt->getByte(self::TAG_IS_MOVABLE, 0);
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function writeSaveData(CompoundTag $nbt) : void{
-		$nbt->setByte(self::TAG_IS_MOVABLE, (int)$this->isMovable);
+		$nbt->setByte(self::TAG_IS_MOVABLE, (int) $this->isMovable);
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
-		$nbt->setByte(self::TAG_IS_MOVABLE, (int)$this->isMovable);
+		$nbt->setByte(self::TAG_IS_MOVABLE, (int) $this->isMovable);
 	}
 }

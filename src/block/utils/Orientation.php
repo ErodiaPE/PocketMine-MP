@@ -39,9 +39,6 @@ enum Orientation{
 	case UP_WEST;
 	case WEST_UP;
 
-	/**
-	 * @return int
-	 */
 	public function getFirst() : int{
 		return match ($this) {
 			self::DOWN_EAST,
@@ -64,9 +61,6 @@ enum Orientation{
 		};
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getSecond() : int{
 		return match ($this) {
 			self::DOWN_EAST,
@@ -88,12 +82,6 @@ enum Orientation{
 		};
 	}
 
-	/**
-	 * @param int $first
-	 * @param int $second
-	 *
-	 * @return self|null
-	 */
 	public static function getByFaces(int $first, int $second) : ?self{
 		foreach(self::cases() as $case){
 			if($case->getFirst() === $first && $case->getSecond() === $second){

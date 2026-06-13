@@ -33,23 +33,15 @@ class SnifferEgg extends Transparent
 {
 	private CrackedState $cracks = CrackedState::NO_CRACKS;
 
-	protected function describeBlockOnlyState(RuntimeDataDescriber $w): void
+	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void
 	{
 		$w->enum($this->cracks);
 	}
 
-	/**
-	 * @return CrackedState
-	 */
 	public function getCracks() : CrackedState{
 		return $this->cracks;
 	}
 
-	/**
-	 * @param CrackedState $cracks
-	 *
-	 * @return SnifferEgg
-	 */
 	public function setCracks(CrackedState $cracks) : SnifferEgg{
 		$this->cracks = $cracks;
 		return $this;

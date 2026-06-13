@@ -31,10 +31,18 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\types\skin\SkinData;
 use pocketmine\network\mcpe\protocol\types\skin\SkinImage;
 use Symfony\Component\Filesystem\Path;
+use function array_shift;
+use function count;
+use function file_get_contents;
 use function is_array;
 use function is_string;
 use function json_decode;
 use function json_encode;
+use function max;
+use function ord;
+use function round;
+use function strlen;
+use function strtolower;
 use const JSON_THROW_ON_ERROR;
 
 class VanillaSkinAdapter implements SkinAdapter{
@@ -84,12 +92,7 @@ class VanillaSkinAdapter implements SkinAdapter{
 		return new Skin($data->getSkinId(), $data->getSkinImage()->getData(), $data->getCapeImage()->getData(), $geometryName, $geometry);
 	}
 
-	/**
-	 * @param string $skinData
-	 *
-	 * @return int
-	 */
-	private function getSkinTransparencyPercentage(string $skinData): int
+	private function getSkinTransparencyPercentage(string $skinData) : int
 	{
 		switch (strlen($skinData)) {
 			case 8192:
@@ -126,15 +129,10 @@ class VanillaSkinAdapter implements SkinAdapter{
 				}
 			}
 		}
-		return (int)round($transparentPixels * 100 / max(1, $pixels));
+		return (int) round($transparentPixels * 100 / max(1, $pixels));
 	}
 
-	/**
-	 * @param array $geometryData
-	 *
-	 * @return array
-	 */
-	private function getCubes(array $geometryData): array
+	private function getCubes(array $geometryData) : array
 	{
 		$cubes = [];
 		foreach ($geometryData['bones'] as $bone) {
@@ -157,28 +155,22 @@ class VanillaSkinAdapter implements SkinAdapter{
 		return $cubes;
 	}
 
-	/**
-	 * @param array $cubes
-	 * @param float $scale
-	 *
-	 * @return array
-	 */
-	private function getBounds(array $cubes, float $scale = 1.0): array
+	private function getBounds(array $cubes, float $scale = 1.0) : array
 	{
 		$bounds = [];
 		foreach ($cubes as $cube) {
-			$x = (int)($scale * $cube['x']);
-			$y = (int)($scale * $cube['y']);
-			$z = (int)($scale * $cube['z']);
-			$uvX = (int)($scale * $cube['uvX']);
-			$uvY = (int)($scale * $cube['uvY']);
+			$x = (int) ($scale * $cube['x']);
+			$y = (int) ($scale * $cube['y']);
+			$z = (int) ($scale * $cube['z']);
+			$uvX = (int) ($scale * $cube['uvX']);
+			$uvY = (int) ($scale * $cube['uvY']);
 			$bounds[] = ['min' => ['x' => $uvX + $z, 'y' => $uvY], 'max' => ['x' => $uvX + $z + (2 * $x) - 1, 'y' => $uvY + $z - 1]];
 			$bounds[] = ['min' => ['x' => $uvX, 'y' => $uvY + $z], 'max' => ['x' => $uvX + (2 * ($z + $x)) - 1, 'y' => $uvY + $z + $y - 1]];
 		}
 		return $bounds;
 	}
 
-	private function parseGeometry(string $resourcePatch, string $geometryData): array {
+	private function parseGeometry(string $resourcePatch, string $geometryData) : array {
 		$resourcePatch = json_decode($resourcePatch, true);
 		if (!is_array($resourcePatch)) {
 			throw new InvalidSkinException("Invalid resourcePatch: not a valid JSON object.");
@@ -291,7 +283,6 @@ class VanillaSkinAdapter implements SkinAdapter{
 		$geometry["minecraft:geometry"] = [$matchedGeometry];
 		return [$geometryName, json_encode($geometry)];
 	}
-
 
 	private function validCubes(array $bone) : void {
 		$name = strtolower($bone["name"]);

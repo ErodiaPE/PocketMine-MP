@@ -24,23 +24,11 @@ declare(strict_types=1);
 namespace pocketmine\block\utils;
 
 interface Brushable{
-	/**
-	 * @return bool
-	 */
 	public function isHanging() : bool;
 
-	/**
-	 * @param bool $hanging
-	 */
 	public function setHanging(bool $hanging) : void;
 
-	/**
-	 * @return int
-	 */
 	public function getProgress() : int;
 
-	/**
-	 * @param int $progress
-	 */
 	public function setProgress(int $progress) : void;
 }

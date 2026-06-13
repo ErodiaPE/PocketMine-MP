@@ -34,9 +34,9 @@ namespace pocketmine\item;
  */
 final class ItemTypeIds{
 
-    private function __construct(){
-       //NOOP
-    }
+	private function __construct(){
+	   //NOOP
+	}
 
 	public const ACACIA_BOAT = 20000;
 	public const ACACIA_CHEST_BOAT = 20001;
@@ -489,29 +489,29 @@ final class ItemTypeIds{
 	public const YELLOW_HARNESS = 20448;
 	public const ZOMBIE_SPAWN_EGG = 20449;
 
-    public const FIRST_UNUSED_ITEM_ID = 20450;
-    
-    private static int $nextDynamicId = self::FIRST_UNUSED_ITEM_ID;
-    
-    /**
-     * Returns a new runtime item type ID, e.g. for use by a custom item.
-     */
-    public static function newId() : int{
-       return self::$nextDynamicId++;
-    }
-    
-    public static function fromBlockTypeId(int $blockTypeId) : int{
-       if($blockTypeId < 0){
-          throw new \InvalidArgumentException("Block type IDs cannot be negative");
-       }
-       //negative item type IDs are treated as block IDs
-       return -$blockTypeId;
-    }
-    
-    public static function toBlockTypeId(int $itemTypeId) : ?int{
-       if($itemTypeId > 0){ //not a blockitem
-          return null;
-       }
-       return -$itemTypeId;
-    }
+	public const FIRST_UNUSED_ITEM_ID = 20450;
+
+	private static int $nextDynamicId = self::FIRST_UNUSED_ITEM_ID;
+
+	/**
+	 * Returns a new runtime item type ID, e.g. for use by a custom item.
+	 */
+	public static function newId() : int{
+	   return self::$nextDynamicId++;
+	}
+
+	public static function fromBlockTypeId(int $blockTypeId) : int{
+	   if($blockTypeId < 0){
+		  throw new \InvalidArgumentException("Block type IDs cannot be negative");
+	   }
+	   //negative item type IDs are treated as block IDs
+	   return -$blockTypeId;
+	}
+
+	public static function toBlockTypeId(int $itemTypeId) : ?int{
+	   if($itemTypeId > 0){ //not a blockitem
+		  return null;
+	   }
+	   return -$itemTypeId;
+	}
 }

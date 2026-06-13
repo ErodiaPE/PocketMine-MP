@@ -31,35 +31,18 @@ class PaleMossCarpet extends MossCarpet{
 	private array $carpetSides = [];
 	private bool $upperBit = false;
 
-	/**
-	 * @param int $facing
-	 *
-	 * @return PaleMossCarpetSide
-	 */
 	public function getCarpetSide(int $facing) : PaleMossCarpetSide{
 		return $this->carpetSides[$facing] ?? PaleMossCarpetSide::NONE;
 	}
 
-	/**
-	 * @param int                $facing
-	 * @param PaleMossCarpetSide $side
-	 *
-	 * @return void
-	 */
 	public function setCarpetSide(int $facing, PaleMossCarpetSide $side) : void{
 		$this->carpetSides[$facing] = $side;
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isUpperBit() : bool{
 		return $this->upperBit;
 	}
 
-	/**
-	 * @param bool $upperBit
-	 */
 	public function setUpperBit(bool $upperBit) : void{
 		$this->upperBit = $upperBit;
 	}

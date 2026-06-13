@@ -2,7 +2,7 @@
 
 /*
  *
- * ____            _        _   __  __ _                  __  __ ____
+ *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
  * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
@@ -27,18 +27,23 @@ use pocketmine\block\VanillaBlocks;
 use pocketmine\item\VanillaItems;
 use pocketmine\utils\Filesystem;
 use pocketmine\utils\Utils;
+use function array_search;
 use function dirname;
 use function fclose;
 use function fopen;
 use function fwrite;
 use function is_dir;
 use function mkdir;
-use function array_search;
+use function str_contains;
+use function strcmp;
+use function strtolower;
 use function usort;
 
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
-/** @return resource */
+/**
+ * @return resource
+ */
 function safe_fopen(string $file, string $flags){
 	$dir = dirname($file);
 	if(!@mkdir($dir, recursive: true) && !is_dir($dir)){
@@ -143,8 +148,8 @@ function getValues(string $clazz, array $ordreStrict = []) : array{
 	// Si on a fourni un ordre strict, on trie le tableau selon cet ordre
 	if (!empty($ordreStrict)) {
 		usort($ids, function($a, $b) use ($ordreStrict) {
-			$posA = array_search($a, $ordreStrict);
-			$posB = array_search($b, $ordreStrict);
+			$posA = array_search($a, $ordreStrict, true);
+			$posB = array_search($b, $ordreStrict, true);
 
 			if ($posA !== false && $posB !== false) return $posA <=> $posB;
 			if ($posA !== false) return -1;

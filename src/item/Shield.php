@@ -27,18 +27,18 @@ use pocketmine\block\Block;
 
 class Shield extends Durable{
 
-	public function getMaxStackSize(): int{
+	public function getMaxStackSize() : int{
 		return 1;
 	}
 
-	public function getMaxDurability(): int{
+	public function getMaxDurability() : int{
 		return 337;
 	}
 
 	/**
 	 * @param Item[] &$returnedItems
 	 */
-	public function onDestroyBlock(Block $block, array &$returnedItems): bool{
+	public function onDestroyBlock(Block $block, array &$returnedItems) : bool{
 		if(!$block->getBreakInfo()->breaksInstantly()){
 			return $this->applyDamage(2);
 		}

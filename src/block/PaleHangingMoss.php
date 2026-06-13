@@ -1,5 +1,24 @@
 <?php
 
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+ */
+
 declare(strict_types=1);
 
 namespace pocketmine\block;
@@ -12,30 +31,21 @@ use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
+use function count;
 
 class PaleHangingMoss extends Flowable {
 
 	private bool $tip = false;
 
-	/**
-	 * @param RuntimeDataDescriber $w
-	 *
-	 * @return void
-	 */
 	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void{
 		$w->bool($this->tip);
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isTip() : bool{
 		return $this->tip;
 	}
 
 	/**
-	 * @param bool $tip
-	 *
 	 * @return $this
 	 */
 	public function setTip(bool $tip) : self{
@@ -43,17 +53,6 @@ class PaleHangingMoss extends Flowable {
 		return $this;
 	}
 
-	/**
-	 * @param BlockTransaction $tx
-	 * @param Item             $item
-	 * @param Block            $blockReplace
-	 * @param Block            $blockClicked
-	 * @param int              $face
-	 * @param Vector3          $clickVector
-	 * @param Player|null      $player
-	 *
-	 * @return bool
-	 */
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		$world = $this->position->getWorld();
 		$up = $world->getBlock($this->position->getSide(Facing::UP));
@@ -69,11 +68,6 @@ class PaleHangingMoss extends Flowable {
 		return true;
 	}
 
-	/**
-	 * @param BlockTransaction $tx
-	 *
-	 * @return void
-	 */
 	private function updateStructure(BlockTransaction $tx) : void{
 		$world = $this->position->getWorld();
 
@@ -102,9 +96,6 @@ class PaleHangingMoss extends Flowable {
 		}
 	}
 
-	/**
-	 * @return void
-	 */
 	public function onNearbyBlockChange() : void{
 		$world = $this->position->getWorld();
 		$up = $world->getBlock($this->position->getSide(Facing::UP));
@@ -114,13 +105,6 @@ class PaleHangingMoss extends Flowable {
 		}
 	}
 
-	/**
-	 * @param Item        $item
-	 * @param Player|null $player
-	 * @param array       $returnedItems
-	 *
-	 * @return bool
-	 */
 	public function onBreak(Item $item, ?Player $player = null, array &$returnedItems = []) : bool{
 		$world = $this->position->getWorld();
 
@@ -139,8 +123,6 @@ class PaleHangingMoss extends Flowable {
 	}
 
 	/**
-	 * @param Item $item
-	 *
 	 * @return array|Item[]
 	 */
 	public function getDrops(Item $item) : array{

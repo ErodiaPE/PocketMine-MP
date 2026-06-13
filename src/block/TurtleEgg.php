@@ -1,5 +1,24 @@
 <?php
 
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+ */
+
 declare(strict_types=1);
 
 namespace pocketmine\block;
@@ -17,42 +36,31 @@ use pocketmine\player\Player;
 use pocketmine\world\BlockTransaction;
 use pocketmine\world\particle\BoneMealParticle;
 use pocketmine\world\sound\TurtleEggCrackSound;
+use function mt_rand;
 
 class TurtleEgg extends Flowable{
 
 	private TurtleEggCount $eggs = TurtleEggCount::ONE_EGG;
 	private CrackedState $cracks = CrackedState::NO_CRACKS;
 
-	protected function describeBlockOnlyState(RuntimeDataDescriber $w): void
+	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void
 	{
 		$w->enum($this->cracks);
 		$w->enum($this->eggs);
 	}
 
-	/**
-	 * @return TurtleEggCount
-	 */
 	public function getEggs() : TurtleEggCount{
 		return $this->eggs;
 	}
 
-	/**
-	 * @param TurtleEggCount $eggs
-	 */
 	public function setEggs(TurtleEggCount $eggs) : void{
 		$this->eggs = $eggs;
 	}
 
-	/**
-	 * @return CrackedState
-	 */
 	public function getCracks() : CrackedState{
 		return $this->cracks;
 	}
 
-	/**
-	 * @param CrackedState $cracks
-	 */
 	public function setCracks(CrackedState $cracks) : void{
 		$this->cracks = $cracks;
 	}
@@ -165,19 +173,19 @@ class TurtleEgg extends Flowable{
 	protected function recalculateCollisionBoxes() : array{
 		return [
 			new AxisAlignedBB(
-				$this->position->x + 3/16,
+				$this->position->x + 3 / 16,
 				$this->position->y,
-				$this->position->z + 3/16,
-				$this->position->x + 13/16,
-				$this->position->y + 7/16,
-				$this->position->z + 13/16
+				$this->position->z + 3 / 16,
+				$this->position->x + 13 / 16,
+				$this->position->y + 7 / 16,
+				$this->position->z + 13 / 16
 			),
 			new AxisAlignedBB(
 				$this->position->x,
 				$this->position->y,
 				$this->position->z,
 				$this->position->x + 1,
-				$this->position->y + 8/16,
+				$this->position->y + 8 / 16,
 				$this->position->z + 1
 			)
 		];

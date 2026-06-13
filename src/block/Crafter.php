@@ -49,16 +49,10 @@ class Crafter extends Opaque implements OrientationFacing{
 		$w->bool($this->triggered);
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isCrafting() : bool{
 		return $this->crafting;
 	}
 
-	/**
-	 * @param bool $crafting
-	 */
 	public function setCrafting(bool $crafting) : void{
 		$this->crafting = $crafting;
 	}
@@ -73,17 +67,6 @@ class Crafter extends Opaque implements OrientationFacing{
 		return $this;
 	}
 
-	/**
-	 * @param BlockTransaction $tx
-	 * @param Item             $item
-	 * @param Block            $blockReplace
-	 * @param Block            $blockClicked
-	 * @param int              $face
-	 * @param Vector3          $clickVector
-	 * @param Player|null      $player
-	 *
-	 * @return bool
-	 */
 	public function place(BlockTransaction $tx, Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, ?Player $player = null) : bool{
 		$orientation = Orientation::DOWN_EAST;
 		if($player !== null){
@@ -107,15 +90,6 @@ class Crafter extends Opaque implements OrientationFacing{
 		return true;
 	}
 
-	/**
-	 * @param Item        $item
-	 * @param int         $face
-	 * @param Vector3     $clickVector
-	 * @param Player|null $player
-	 * @param array       $returnedItems
-	 *
-	 * @return bool
-	 */
 	public function onInteract(Item $item, int $face, Vector3 $clickVector, ?Player $player = null, array &$returnedItems = []) : bool{
 		if ($player !== null) {
 			$tile = $this->position->getWorld()->getTile($this->position);

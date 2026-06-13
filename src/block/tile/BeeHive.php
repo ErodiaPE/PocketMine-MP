@@ -26,6 +26,7 @@ namespace pocketmine\block\tile;
 use pocketmine\block\utils\Occupant;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
+use function array_map;
 
 class BeeHive extends Spawnable{
 	public const TAG_OCCUPANTS = "Occupants";
@@ -38,30 +39,18 @@ class BeeHive extends Spawnable{
 	private array $occupants = [];
 	private bool $shouldSpawnBees = false;
 
-	/**
-	 * @return bool
-	 */
 	public function isShouldSpawnBees() : bool{
 		return $this->shouldSpawnBees;
 	}
 
-	/**
-	 * @param bool $shouldSpawnBees
-	 */
 	public function setShouldSpawnBees(bool $shouldSpawnBees) : void{
 		$this->shouldSpawnBees = $shouldSpawnBees;
 	}
 
-	/**
-	 * @return array
-	 */
 	public function getOccupants() : array{
 		return $this->occupants;
 	}
 
-	/**
-	 * @param array $occupants
-	 */
 	public function setOccupants(array $occupants) : void{
 		$this->occupants = $occupants;
 	}
@@ -77,29 +66,19 @@ class BeeHive extends Spawnable{
 			$this->addOccupant(Occupant::fromNBT($tag));
 		}
 
-		$this->shouldSpawnBees = (bool)$nbt->getByte(self::TAG_SHOULD_SPAWN_BEES, 0);
+		$this->shouldSpawnBees = (bool) $nbt->getByte(self::TAG_SHOULD_SPAWN_BEES, 0);
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function writeSaveData(CompoundTag $nbt) : void{
 		$nbt->setTag(self::TAG_OCCUPANTS, new ListTag(array_map(fn(Occupant $occupant) => $occupant->saveNBT(), $this->occupants)));
-		$nbt->setByte(self::TAG_SHOULD_SPAWN_BEES, (int)$this->shouldSpawnBees);
+		$nbt->setByte(self::TAG_SHOULD_SPAWN_BEES, (int) $this->shouldSpawnBees);
 	}
 
-	/**
-	 * @param CompoundTag $nbt
-	 *
-	 * @return void
-	 */
 	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
 		$nbt->setTag(self::TAG_OCCUPANTS,
 			CompoundTag::create()
 				->setTag(self::TAG_OCCUPANTS, new ListTag(array_map(fn(Occupant $occupant) => $occupant->saveNBT(), $this->occupants)))
 		);
-		$nbt->setByte(self::TAG_SHOULD_SPAWN_BEES, (int)$this->shouldSpawnBees);
+		$nbt->setByte(self::TAG_SHOULD_SPAWN_BEES, (int) $this->shouldSpawnBees);
 	}
 }

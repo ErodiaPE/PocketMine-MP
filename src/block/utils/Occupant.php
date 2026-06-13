@@ -1,5 +1,26 @@
 <?php
 
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+ */
+
+declare(strict_types=1);
+
 namespace pocketmine\block\utils;
 
 use pocketmine\nbt\tag\CompoundTag;
@@ -26,7 +47,7 @@ class Occupant
 		$this->saveData = clone $saveData;
 	}
 
-	public static function fromNBT(CompoundTag $saved): self
+	public static function fromNBT(CompoundTag $saved) : self
 	{
 		$self = new self(
 			$saved->getInt("TicksLeftToStay"),
@@ -51,7 +72,7 @@ class Occupant
 		return $self;
 	}
 
-	public function saveNBT(): CompoundTag
+	public function saveNBT() : CompoundTag
 	{
 		return CompoundTag::create()
 			->setString("ActorIdentifier", $this->actorIdentifier)
@@ -63,23 +84,23 @@ class Occupant
 			->setByte("Muted", $this->muted);
 	}
 
-	public function getTicksLeftToStay(): int { return $this->ticksLeftToStay; }
-	public function setTicksLeftToStay(int $v): void { $this->ticksLeftToStay = $v; }
+	public function getTicksLeftToStay() : int { return $this->ticksLeftToStay; }
+	public function setTicksLeftToStay(int $v) : void { $this->ticksLeftToStay = $v; }
 
-	public function getActorIdentifier(): string { return $this->actorIdentifier; }
-	public function setActorIdentifier(string $v): void { $this->actorIdentifier = $v; }
+	public function getActorIdentifier() : string { return $this->actorIdentifier; }
+	public function setActorIdentifier(string $v) : void { $this->actorIdentifier = $v; }
 
-	public function getSaveData(): CompoundTag { return clone $this->saveData; }
-	public function setSaveData(CompoundTag $v): void { $this->saveData = clone $v; }
+	public function getSaveData() : CompoundTag { return clone $this->saveData; }
+	public function setSaveData(CompoundTag $v) : void { $this->saveData = clone $v; }
 
 	//public function getWorkSound(): Sound { return $this->workSound; }
 	//public function setWorkSound(Sound $v): void { $this->workSound = $v; }
 	//public function getWorkSoundPitch(): float { return $this->workSoundPitch; }
 	//public function setWorkSoundPitch(float $v): void { $this->workSoundPitch = $v; }
 
-	public function getHasNectar(): bool { return $this->hasNectar; }
-	public function setHasNectar(bool $v): void { $this->hasNectar = $v; }
+	public function getHasNectar() : bool { return $this->hasNectar; }
+	public function setHasNectar(bool $v) : void { $this->hasNectar = $v; }
 
-	public function isMuted(): bool { return $this->muted; }
-	public function setMuted(bool $v): void { $this->muted = $v; }
+	public function isMuted() : bool { return $this->muted; }
+	public function setMuted(bool $v) : void { $this->muted = $v; }
 }

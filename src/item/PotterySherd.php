@@ -30,18 +30,10 @@ class PotterySherd extends Item{
 		return 1;
 	}
 
-	/**
-	 * @return PotterySherdType
-	 */
 	public function getType() : PotterySherdType{
 		return $this->type;
 	}
 
-	/**
-	 * @param PotterySherdType $type
-	 *
-	 * @return PotterySherd
-	 */
 	public function setType(PotterySherdType $type) : PotterySherd{
 		$this->type = $type;
 		return $this;

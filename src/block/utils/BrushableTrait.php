@@ -29,44 +29,23 @@ trait BrushableTrait{
 	private bool $hanging = false;
 	private int $progress = 0;
 
-	/**
-	 * @return bool
-	 */
 	public function isHanging() : bool{
 		return $this->hanging;
 	}
 
-	/**
-	 * @param bool $hanging
-	 *
-	 * @return void
-	 */
 	public function setHanging(bool $hanging) : void{
 		$this->hanging = $hanging;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getProgress() : int{
 		return $this->progress;
 	}
 
-	/**
-	 * @param int $progress
-	 *
-	 * @return void
-	 */
 	public function setProgress(int $progress) : void{
 		$this->progress = $progress;
 	}
 
-	/**
-	 * @param RuntimeDataDescriber $w
-	 *
-	 * @return void
-	 */
-	protected function describeBlockOnlyState(RuntimeDataDescriber $w): void
+	protected function describeBlockOnlyState(RuntimeDataDescriber $w) : void
 	{
 		$w->bool($this->hanging);
 		$w->boundedIntAuto(0, 3, $this->progress);
