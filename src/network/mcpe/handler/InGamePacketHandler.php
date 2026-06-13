@@ -51,6 +51,7 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\FilterNoisyPacketException;
+use pocketmine\network\mcpe\convert\ItemTranslator;
 use pocketmine\network\mcpe\InventoryManager;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
@@ -59,7 +60,6 @@ use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
 use pocketmine\network\mcpe\protocol\BlockPickRequestPacket;
 use pocketmine\network\mcpe\protocol\BookEditPacket;
-use pocketmine\network\mcpe\protocol\BossEventPacket;
 use pocketmine\network\mcpe\protocol\CommandBlockUpdatePacket;
 use pocketmine\network\mcpe\protocol\CommandRequestPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
@@ -68,10 +68,8 @@ use pocketmine\network\mcpe\protocol\InteractPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\ItemStackRequestPacket;
 use pocketmine\network\mcpe\protocol\ItemStackResponsePacket;
-use pocketmine\network\mcpe\protocol\LabTablePacket;
 use pocketmine\network\mcpe\protocol\LecternUpdatePacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
-use pocketmine\network\mcpe\protocol\MapInfoRequestPacket;
 use pocketmine\network\mcpe\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
 use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
@@ -84,12 +82,9 @@ use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
 use pocketmine\network\mcpe\protocol\PlayerToggleCrafterSlotRequestPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\serializer\BitSet;
-use pocketmine\network\mcpe\protocol\ServerSettingsRequestPacket;
 use pocketmine\network\mcpe\protocol\SetActorMotionPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
-use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
-use pocketmine\network\mcpe\protocol\SubClientLoginPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\network\mcpe\protocol\types\inventory\ContainerIds;
@@ -113,7 +108,6 @@ use pocketmine\utils\Limits;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 use pocketmine\world\format\Chunk;
-use pocketmine\world\Position;
 use function array_push;
 use function count;
 use function fmod;
@@ -126,7 +120,6 @@ use function json_decode;
 use function max;
 use function mb_strlen;
 use function microtime;
-use function round;
 use function sprintf;
 use function str_starts_with;
 use function strlen;
@@ -144,6 +137,7 @@ use const JSON_THROW_ON_ERROR;
 #[SilentDiscard(SetActorMotionPacket::class, comment: "Not needed, erroneously sent by client when in a vehicle")]
 #[SilentDiscard(SpawnExperienceOrbPacket::class, comment: "XP drops should be server-calculated")]
 class InGamePacketHandler extends PacketHandler{
+	private const MAX_FORM_RESPONSE_SIZE = 10 * 1024; //10 KiB should be more than enough
 	private const MAX_FORM_RESPONSE_DEPTH = 2; //modal/simple will be 1, custom forms 2 - they will never contain anything other than string|int|float|bool|null
 
 	//TODO: The client-side per-page character limit is inconsistent for non-ASCII text,
@@ -177,12 +171,6 @@ class InGamePacketHandler extends PacketHandler{
 		}
 
 		return false;
-	}
-
-	public function handleMovePlayer(MovePlayerPacket $packet) : bool{
-		//The client sends this every time it lands on the ground, even when using PlayerAuthInputPacket.
-		//Silence the debug spam that this causes.
-		return true;
 	}
 
 	private function resolveOnOffInputFlags(BitSet $inputFlags, int $startFlag, int $stopFlag) : ?bool{
@@ -264,16 +252,12 @@ class InGamePacketHandler extends PacketHandler{
 			}
 		}
 
-		/**
-		 * The client sends -0.0784 when on ground
-		 * Unfortunately, someone with malicious intent could falsify the data,
-		 * as it is not possible to detect whether the player is on the ground or not on the server side,
-		 * because this causes the server to lag.
-		 */
-		$delta = round($packet->getDelta()->getY(), 4);
-		$this->player->onGround = $delta == -0.0784;
+		if(!$this->forceMoveSync && $hasMoved){
+			$this->lastPlayerAuthInputPosition = $rawPos;
+			//TODO: this packet has WAYYYYY more useful information that we're not using
+			$this->player->handleMovement($newPos);
+		}
 
-		$this->processMovements($packet->getPosition(), fixHeadOffset: true);
 		$packetHandled = true;
 
 		$useItemTransaction = $packet->getItemInteractionData();
@@ -324,39 +308,6 @@ class InGamePacketHandler extends PacketHandler{
 		}
 
 		return $packetHandled;
-	}
-
-	/**
-	 * @param Position $position
-	 * @param bool     $fixHeadOffset $
-	 */
-	private function processMovements(Vector3 $position, bool $fixHeadOffset) : void{
-		$hasMoved = $this->lastPlayerAuthInputPosition === null || !$this->lastPlayerAuthInputPosition->equals($position);
-
-		$newPos = $position;
-		if($fixHeadOffset) {
-			$headOffset = $this->player->isSneaking() ? 1.54 : 1.62; //TODO: this is a hack, the client doesn't send the head offset, so we assume it's always 1.62 unless sneaking
-			$newPos = $position->subtract(0, $headOffset, 0); //the client sends the head position, but we need the feet position for movement handling
-		}
-
-		if($this->forceMoveSync && $hasMoved){
-			$curPos = $this->player->getLocation();
-
-			if($newPos->distanceSquared($curPos) > 1){  //Tolerate up to 1 block to avoid problems with client-sided physics when spawning in blocks
-				$this->session->getLogger()->debug("Got outdated pre-teleport movement, received " . $newPos . ", expected " . $curPos);
-				//Still getting movements from before teleport, ignore them
-				return;
-			}
-
-			// Once we get a movement within a reasonable distance, treat it as a teleport ACK and remove position lock
-			$this->forceMoveSync = false;
-		}
-
-		if(!$this->forceMoveSync && $hasMoved){
-			$this->lastPlayerAuthInputPosition = $position;
-			//TODO: this packet has WAYYYYY more useful information that we're not using
-			$this->player->handleMovement($newPos);
-		}
 	}
 
 	public function handleInventoryTransaction(InventoryTransactionPacket $packet) : bool{
@@ -512,7 +463,6 @@ class InGamePacketHandler extends PacketHandler{
 
 	private function handleUseItemTransaction(UseItemTransactionData $data) : bool{
 		$this->player->selectHotbarSlot($data->getHotbarSlot());
-		$this->processMovements($data->getPlayerPosition(), fixHeadOffset: false);
 
 		switch($data->getActionType()){
 			case UseItemTransactionData::ACTION_CLICK_BLOCK:
@@ -539,11 +489,19 @@ class InGamePacketHandler extends PacketHandler{
 				$vBlockPos = new Vector3($blockPos->getX(), $blockPos->getY(), $blockPos->getZ());
 				$this->player->interactBlock($vBlockPos, $data->getFace(), $clickPos);
 				if($data->getClientInteractPrediction() === PredictedResult::SUCCESS){
-					//always sync this in case plugins caused a different result than the client expected
-					//we *could* try to enhance detection of plugin-altered behaviour, but this would require propagating
-					//more information up the stack. For now I think this is good enough.
-					//if only the client would tell us what blocks it thinks changed...
-					$this->syncBlocksNearby($vBlockPos, $data->getFace());
+					//If the item has an associated blockstate ID, this means it will only place one block.
+					//We can avoid syncing the adjacent blocks of the place position in this case, since that's only
+					//necessary if there might be multiple blocks around the placement location affected.
+					//Adjacents of the clicked block are still always synced, since it's too complicated to figure out
+					//if the client might've predicted something in this case. However, since the clicked block is always
+					//"behind" the placed block, this shouldn't affect bridging or fast placement.
+					//This would be much easier if the client would just tell us which blocks it thinks changed...
+					$syncAdjacentFace = null;
+					if($data->getItemInHand()->getItemStack()->getBlockRuntimeId() === ItemTranslator::NO_BLOCK_RUNTIME_ID){
+						$this->session->getLogger()->debug("Placing held item might place multiple blocks client-side; doing full adjacent sync");
+						$syncAdjacentFace = $data->getFace();
+					}
+					$this->syncBlocksNearby($vBlockPos, $syncAdjacentFace);
 				}
 				return true;
 			case UseItemTransactionData::ACTION_CLICK_AIR:
@@ -552,6 +510,10 @@ class InGamePacketHandler extends PacketHandler{
 						$hungerAttr = $this->player->getAttributeMap()->get(Attribute::HUNGER) ?? throw new AssumptionFailedError();
 						$hungerAttr->markSynchronized(false);
 					}
+					//TODO: workaround goat horns getting stuck in the "using item" state
+					//this timed-trigger behaviour is also used for other items apart from food
+					//in the future we'll generalise this logic and add proper hooks for it
+					$this->player->setUsingItem(false);
 					return true;
 				}
 				$this->player->useHeldItem();
@@ -601,12 +563,13 @@ class InGamePacketHandler extends PacketHandler{
 
 	private function handleUseItemOnEntityTransaction(UseItemOnEntityTransactionData $data) : bool{
 		$target = $this->player->getWorld()->getEntity($data->getActorRuntimeId());
-		if($target === null){
+		//TODO: HACK! We really shouldn't be keeping disconnected players (and generally flagged-for-despawn entities)
+		//in the world's entity table, but changing that is too risky for a hotfix. This workaround will do for now.
+		if($target === null || $target->isFlaggedForDespawn()){
 			return false;
 		}
 
 		$this->player->selectHotbarSlot($data->getHotbarSlot());
-		$this->processMovements($data->getPlayerPosition(), fixHeadOffset: false);
 
 		switch($data->getActionType()){
 			case UseItemOnEntityTransactionData::ACTION_INTERACT:
@@ -622,7 +585,6 @@ class InGamePacketHandler extends PacketHandler{
 
 	private function handleReleaseItemTransaction(ReleaseItemTransactionData $data) : bool{
 		$this->player->selectHotbarSlot($data->getHotbarSlot());
-		$this->processMovements($data->getHeadPosition(), fixHeadOffset: true);
 
 		if($data->getActionType() === ReleaseItemTransactionData::ACTION_RELEASE){
 			$this->player->releaseHeldItem();
@@ -693,10 +655,6 @@ class InGamePacketHandler extends PacketHandler{
 		return false;
 	}
 
-	public function handleMobArmorEquipment(MobArmorEquipmentPacket $packet) : bool{
-		return true; //Not used
-	}
-
 	public function handleInteract(InteractPacket $packet) : bool{
 		if($packet->action === InteractPacket::ACTION_MOUSEOVER){
 			//TODO HACK: silence useless spam (MCPE 1.8)
@@ -732,7 +690,6 @@ class InGamePacketHandler extends PacketHandler{
 	private function handlePlayerActionFromData(int $action, BlockPosition $blockPosition, int $face) : bool{
 		$pos = new Vector3($blockPosition->getX(), $blockPosition->getY(), $blockPosition->getZ());
 
-		$this->session->getLogger()->debug("PlayerAction $action on $pos (face: $face)");
 		switch($action){
 			case PlayerAction::START_BREAK:
 			case PlayerAction::CONTINUE_DESTROY_BLOCK: //destroy the next block while holding down left click
@@ -850,10 +807,6 @@ class InGamePacketHandler extends PacketHandler{
 		return true;
 	}
 
-	public function handleSetActorMotion(SetActorMotionPacket $packet) : bool{
-		return true; //Not used: This packet is (erroneously) sent to the server when the client is riding a vehicle.
-	}
-
 	public function handleAnimate(AnimatePacket $packet) : bool{
 		//this spams harder than a firehose on left click if "Improved Input Response" is enabled, and we don't even
 		//use it anyway :<
@@ -863,10 +816,6 @@ class InGamePacketHandler extends PacketHandler{
 	public function handleContainerClose(ContainerClosePacket $packet) : bool{
 		$this->inventoryManager->onClientRemoveWindow($packet->windowId);
 		return true;
-	}
-
-	public function handlePlayerHotbar(PlayerHotbarPacket $packet) : bool{
-		return true; //this packet is useless
 	}
 
 	/**
@@ -937,26 +886,10 @@ class InGamePacketHandler extends PacketHandler{
 		return true;
 	}
 
-	public function handleSpawnExperienceOrb(SpawnExperienceOrbPacket $packet) : bool{
-		return false; //TODO
-	}
-
-	public function handleMapInfoRequest(MapInfoRequestPacket $packet) : bool{
-		return false; //TODO
-	}
-
 	public function handleRequestChunkRadius(RequestChunkRadiusPacket $packet) : bool{
 		$this->player->setViewDistance($packet->radius);
 
 		return true;
-	}
-
-	public function handleBossEvent(BossEventPacket $packet) : bool{
-		return false; //TODO
-	}
-
-	public function handleShowCredits(ShowCreditsPacket $packet) : bool{
-		return false; //TODO: handle resume
 	}
 
 	public function handleCommandRequest(CommandRequestPacket $packet) : bool{
@@ -1016,10 +949,6 @@ class InGamePacketHandler extends PacketHandler{
 		return $this->player->changeSkin($skin, $packet->newSkinName, $packet->oldSkinName);
 	}
 
-	public function handleSubClientLogin(SubClientLoginPacket $packet) : bool{
-		return false; //TODO
-	}
-
 	/**
 	 * @throws PacketHandlingException
 	 */
@@ -1054,7 +983,7 @@ class InGamePacketHandler extends PacketHandler{
 		$cancel = false;
 		switch($packet->type){
 			case BookEditPacket::TYPE_REPLACE_PAGE:
-				$text = self::checkBookText($packet->text, "page text", 256, WritableBookPage::PAGE_LENGTH_HARD_LIMIT_BYTES, $cancel);
+				$text = self::checkBookText($packet->text, "page text", self::PAGE_LENGTH_SOFT_LIMIT_CHARS, WritableBookPage::PAGE_LENGTH_HARD_LIMIT_BYTES, $cancel);
 				$newBook->setPageText($packet->pageNumber, $text);
 				$modifiedPages[] = $packet->pageNumber;
 				break;
@@ -1064,7 +993,7 @@ class InGamePacketHandler extends PacketHandler{
 					//TODO: the client can send insert-before actions on trailing client-side pages which cause odd behaviour on the server
 					return false;
 				}
-				$text = self::checkBookText($packet->text, "page text", 256, WritableBookPage::PAGE_LENGTH_HARD_LIMIT_BYTES, $cancel);
+				$text = self::checkBookText($packet->text, "page text", self::PAGE_LENGTH_SOFT_LIMIT_CHARS, WritableBookPage::PAGE_LENGTH_HARD_LIMIT_BYTES, $cancel);
 				$newBook->insertPage($packet->pageNumber, $text);
 				$modifiedPages[] = $packet->pageNumber;
 				break;
@@ -1139,6 +1068,13 @@ class InGamePacketHandler extends PacketHandler{
 			//TODO: make APIs for this to allow plugins to use this information
 			return $this->player->onFormSubmit($packet->formId, null);
 		}elseif($packet->formData !== null){
+			if(strlen($packet->formData) > self::MAX_FORM_RESPONSE_SIZE){
+				throw new PacketHandlingException("Form response data too large, refusing to decode (received" . strlen($packet->formData) . " bytes, max " . self::MAX_FORM_RESPONSE_SIZE . " bytes)");
+			}
+			if(!$this->player->hasPendingForm($packet->formId)){
+				$this->session->getLogger()->debug("Got unexpected response for form $packet->formId");
+				return false;
+			}
 			try{
 				$responseData = json_decode($packet->formData, true, self::MAX_FORM_RESPONSE_DEPTH, JSON_THROW_ON_ERROR);
 			}catch(\JsonException $e){
@@ -1148,14 +1084,6 @@ class InGamePacketHandler extends PacketHandler{
 		}else{
 			throw new PacketHandlingException("Expected either formData or cancelReason to be set in ModalFormResponsePacket");
 		}
-	}
-
-	public function handleServerSettingsRequest(ServerSettingsRequestPacket $packet) : bool{
-		return false; //TODO: GUI stuff
-	}
-
-	public function handleLabTable(LabTablePacket $packet) : bool{
-		return false; //TODO
 	}
 
 	public function handleLecternUpdate(LecternUpdatePacket $packet) : bool{
@@ -1176,20 +1104,6 @@ class InGamePacketHandler extends PacketHandler{
 		}
 
 		return false;
-	}
-
-	public function handleNetworkStackLatency(NetworkStackLatencyPacket $packet) : bool{
-		return true; //TODO: implement this properly - this is here to silence debug spam from MCPE dev builds
-	}
-
-	public function handleLevelSoundEvent(LevelSoundEventPacket $packet) : bool{
-		/*
-		 * We don't handle this - all sounds are handled by the server now.
-		 * However, some plugins find this useful to detect events like left-click-air, which doesn't have any other
-		 * action bound to it.
-		 * In addition, we use this handler to silence debug noise, since this packet is frequently sent by the client.
-		 */
-		return true;
 	}
 
 	public function handleEmote(EmotePacket $packet) : bool{

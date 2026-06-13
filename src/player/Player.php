@@ -130,7 +130,6 @@ use pocketmine\Server;
 use pocketmine\ServerProperties;
 use pocketmine\timings\Timings;
 use pocketmine\utils\AssumptionFailedError;
-use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 use pocketmine\world\ChunkListener;
 use pocketmine\world\ChunkListenerNoOpTrait;
@@ -155,6 +154,7 @@ use function count;
 use function explode;
 use function floor;
 use function get_class;
+use function max;
 use function mb_strlen;
 use function microtime;
 use function min;
@@ -316,15 +316,12 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	protected array $forms = [];
 
 	protected \Logger $logger;
-	protected Config $tweaks;
 
 	protected ?SurvivalBlockBreakHandler $blockBreakHandler = null;
 
 	public function __construct(Server $server, NetworkSession $session, PlayerInfo $playerInfo, bool $authenticated, Location $spawnLocation, ?CompoundTag $namedtag){
 		$username = TextFormat::clean($playerInfo->getUsername());
 		$this->logger = new \PrefixedLogger($server->getLogger(), "Player: $username");
-
-		$this->tweaks = Server::getInstance()->getTweaks();
 
 		$this->server = $server;
 		$this->networkSession = $session;
@@ -885,13 +882,13 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 			$this->usedChunks[$index] = UsedChunkStatus::REQUESTED_GENERATION;
 			$this->activeChunkGenerationRequests[$index] = true;
 			unset($this->loadQueue[$index]);
-			$world->registerChunkLoader($this->chunkLoader, (int) $X, (int) $Z, true);
-			$world->registerChunkListener($this, (int) $X, (int) $Z);
+			$world->registerChunkLoader($this->chunkLoader, $X, $Z, true);
+			$world->registerChunkListener($this, $X, $Z);
 			if(isset($this->tickingChunks[$index])){
-				$world->registerTickingChunk($this->chunkTicker, (int) $X, (int) $Z);
+				$world->registerTickingChunk($this->chunkTicker, $X, $Z);
 			}
 
-			$world->requestChunkPopulation((int) $X, (int) $Z, $this->chunkLoader)->onCompletion(
+			$world->requestChunkPopulation($X, $Z, $this->chunkLoader)->onCompletion(
 				function() use ($X, $Z, $index, $world) : void{
 					if(!$this->isConnected() || !isset($this->usedChunks[$index]) || $world !== $this->getWorld()){
 						return;
@@ -905,10 +902,10 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 					unset($this->activeChunkGenerationRequests[$index]);
 					$this->usedChunks[$index] = UsedChunkStatus::REQUESTED_SENDING;
 
-					$this->getNetworkSession()->startUsingChunk((int) $X, (int) $Z, function() use ($X, $Z, $index) : void{
+					$this->getNetworkSession()->startUsingChunk($X, $Z, function() use ($X, $Z, $index) : void{
 						$this->usedChunks[$index] = UsedChunkStatus::SENT;
 						if($this->spawnChunkLoadCount === -1){
-							$this->spawnEntitiesOnChunk((int) $X, (int) $Z);
+							$this->spawnEntitiesOnChunk($X, $Z);
 						}elseif($this->spawnChunkLoadCount++ === $this->spawnThreshold){
 							$this->spawnChunkLoadCount = -1;
 
@@ -916,7 +913,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 
 							$this->getNetworkSession()->notifyTerrainReady();
 						}
-						(new PlayerPostChunkSendEvent($this, (int) $X, (int) $Z))->call();
+						(new PlayerPostChunkSendEvent($this, $X, $Z))->call();
 					});
 				},
 				static function() : void{
@@ -1383,6 +1380,11 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	}
 
 	private function actuallyHandleMovement(Vector3 $newPos) : void{
+		$this->moveRateLimit--;
+		if($this->moveRateLimit < 0){
+			return;
+		}
+
 		$oldPos = $this->location;
 		$distanceSquared = $newPos->distanceSquared($oldPos);
 
@@ -1425,11 +1427,19 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 	 * Fires movement events and synchronizes player movement, every tick.
 	 */
 	protected function processMostRecentMovements() : void{
+		$now = microtime(true);
+		$multiplier = $this->lastMovementProcess !== null ? ($now - $this->lastMovementProcess) * 20 : 1;
+		$exceededRateLimit = $this->moveRateLimit < 0;
+		$this->moveRateLimit = min(self::MOVE_BACKLOG_SIZE, max(0, $this->moveRateLimit) + self::MOVES_PER_TICK * $multiplier);
+		$this->lastMovementProcess = $now;
+
 		$from = clone $this->lastLocation;
 		$to = clone $this->location;
 
 		$delta = $to->distanceSquared($from);
-		if($delta > 0.0001){
+		$deltaAngle = abs($this->lastLocation->yaw - $to->yaw) + abs($this->lastLocation->pitch - $to->pitch);
+
+		if($delta > 0.0001 || $deltaAngle > 1.0){
 			if(PlayerMoveEvent::hasHandlers()){
 				$ev = new PlayerMoveEvent($this, $from, $to);
 
@@ -1463,15 +1473,11 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 				}
 			}
 		}
-	}
 
-	protected function revertMovement(Location $from) : void{
-		$this->setPosition($from);
-		$this->sendPosition($from, $from->yaw, $from->pitch, MovePlayerPacket::MODE_RESET);
-	}
-
-	protected function calculateFallDamage(float $fallDistance) : float{
-		return $this->flying ? 0 : parent::calculateFallDamage($fallDistance);
+		if($exceededRateLimit){ //client and server positions will be out of sync if this happens
+			$this->logger->debug("Exceeded movement rate limit, forcing to last accepted position");
+			$this->sendPosition($this->location, $this->location->getYaw(), $this->location->getPitch(), MovePlayerPacket::MODE_RESET);
+		}
 	}
 
 	protected function move(float $dx, float $dy, float $dz) : void{
@@ -1527,6 +1533,15 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 			$postFallVerticalVelocity ?? null,
 			null
 		);
+	}
+
+	protected function revertMovement(Location $from) : void{
+		$this->setPosition($from);
+		$this->sendPosition($from, $from->yaw, $from->pitch, MovePlayerPacket::MODE_RESET);
+	}
+
+	protected function calculateFallDamage(float $fallDistance) : float{
+		return $this->flying ? 0 : parent::calculateFallDamage($fallDistance);
 	}
 
 	public function jump() : void{
@@ -1593,7 +1608,7 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 				$this->fireTicks = 1;
 			}
 
-			$entityCollisions = (bool) $this->tweaks->getNested("performance.entity-collisions", true);
+			$entityCollisions = (bool) $this->getServer()->getTweaks()->getNested("performance.entity-collisions", true);
 			if(!$this->isSpectator() && $this->isAlive() && $entityCollisions){
 				Timings::$playerCheckNearEntities->startTiming();
 				$this->checkNearEntities();
@@ -2171,7 +2186,6 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 		if(!$sprint) {
 			$this->resetSprintState();
 		}
-
 		return true;
 	}
 
