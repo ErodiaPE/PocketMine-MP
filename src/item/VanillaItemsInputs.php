@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use pocketmine\block\utils\DyeColor;
 use pocketmine\block\utils\RecordType;
 use pocketmine\block\VanillaBlocks as Blocks;
 use pocketmine\entity\Entity;
@@ -118,6 +119,7 @@ final class VanillaItemsInputs extends RegistrySource{
 		self::register("bone_meal", fn(IID $id) => new Fertilizer($id, "Bone Meal"));
 		self::register("book", fn(IID $id) => new Book($id, "Book", [EnchantmentTags::ALL]));
 		self::register("bow", fn(IID $id) => new Bow($id, "Bow", [EnchantmentTags::BOW]));
+		self::register("crossbow", fn(IID $id) => new CrossBow($id, "Crossbow", [EnchantmentTags::CROSSBOW]));
 		self::register("bowl", fn(IID $id) => new Bowl($id, "Bowl"));
 		self::register("bread", fn(IID $id) => new Bread($id, "Bread"));
 		self::register("brick", fn(IID $id) => new Item($id, "Brick"));
@@ -337,6 +339,80 @@ final class VanillaItemsInputs extends RegistrySource{
 		foreach(BoatType::cases() as $type){
 			//boat type is static, because different types of wood may have different properties
 			self::register(strtolower($type->name) . "_boat", fn(IID $id) => new Boat($id, $type->getDisplayName() . " Boat", $type));
+			self::register(strtolower($type->name) . "_chest_boat", fn(IID $id) => new ChestBoat($id, $type->getDisplayName() . " Chest Boat", $type));
+		}
+
+		self::register("mace", fn(IID $id) => new Mace($id, "Mace", [EnchantmentTags::WEAPONS]));
+		self::register("shield", fn(IID $id) => new Shield($id, "Shield", [EnchantmentTags::WEAPONS]));
+		self::register("carrot_on_a_stick", fn(IID $id) => new CarrotOnAStick($id, "Carrot on a Stick"));
+		self::register("warped_fungus_on_a_stick", fn(IID $id) => new WarpedFungusOnAStick($id, "Warped Fungus on a Stick"));
+		self::register("wind_charge", fn(IID $id) => new WindCharge($id, "Wind Charge"));
+		self::register("lead", fn(IID $id) => new Item($id, "Lead"));
+		self::register("empty_map", fn(IID $id) => new Item($id, "Empty Map"));
+		self::register("empty_locator_map", fn(IID $id) => new Item($id, "Empty Locator Map"));
+		self::register("saddle", fn(IID $id) => new Item($id, "Saddle"));
+		self::register("wolf_armor", fn(IID $id) => new WolfArmor($id, "Wolf Armor"));
+		self::registerDelayed("elytra", fn($name) : Elytra => new Elytra(self::makeIID($name), "Elytra"));
+		self::register("brush", fn(IID $id) => new Brush($id, "Brush"));
+		self::register("ominous_bottle", fn(IID $id) => new OminousBottle($id, "Ominous Bottle"));
+
+		self::register("bundle", fn(IID $id) => new Bundle($id, "Bundle"));
+		foreach (DyeColor::cases() as $c) {
+			$key = strtolower($c->name);
+			$display = ucfirst(strtolower($c->name));
+
+			self::register($key . "_harness", fn(IID $id) => (new Harness($id, $display . " Harness"))->setColor($c));
+			self::register($key . "_bundle", fn(IID $id) => (new Bundle($id, $display . " Bundle"))->setColor($c));
+		}
+
+		foreach ([
+			"LEATHER",
+			"COPPER",
+			"IRON",
+			"GOLDEN",
+			"DIAMOND",
+			"NETHERITE",
+		] as $type) {
+			self::register(strtolower($type) . "_horse_armor", fn(IID $id) => (new HorseArmor($id, ucfirst(strtolower($type)) . " Horse Armor")));
+		}
+
+		foreach ([
+			"COPPER",
+			"IRON",
+			"GOLDEN",
+			"DIAMOND",
+			"NETHERITE",
+		] as $type) {
+			self::register(strtolower($type) . "_nautilus_armor", fn(IID $id) => new NautilusArmor($id, ucfirst(strtolower($type)) . " Nautilus Armor"));
+		}
+
+		self::registerDelayed("cod_bucket", fn(string $name) : LiquidBucket => new LiquidBucket(self::makeIID($name), "Bucket of Cod", Blocks::WATER()));
+		self::registerDelayed("salmon_bucket", fn(string $name) : LiquidBucket => new LiquidBucket(self::makeIID($name), "Bucket of Salmon", Blocks::WATER()));
+		self::registerDelayed("tropical_fish_bucket", fn(string $name) : LiquidBucket => new LiquidBucket(self::makeIID($name), "Bucket of Tropical Fish", Blocks::WATER()));
+		self::registerDelayed("pufferfish_bucket", fn(string $name) : LiquidBucket => new LiquidBucket(self::makeIID($name), "Bucket of PufferFish", Blocks::WATER()));
+		self::registerDelayed("axolotl_bucket", fn(string $name) : LiquidBucket => new LiquidBucket(self::makeIID($name), "Bucket of Axolotl", Blocks::WATER()));
+		self::registerDelayed("tadpole_bucket", fn(string $name) : LiquidBucket => new LiquidBucket(self::makeIID($name), "Bucket of Tadpole", Blocks::WATER()));
+		self::registerDelayed("powder_snow_bucket", fn(string $name) : PowerSnowBucket => new PowerSnowBucket(self::makeIID($name), "Powder Snow Bucket"));
+
+		self::register("armor_stand", fn(IID $id) => new ArmorStand($id, "Armor Stand"));
+		self::register("breeze_rod", fn(IID $id) => new BreezeRod($id, "Breeze Rod"));
+		self::register("armadillo_scute", fn(IID $id) => new Item($id, "Armadillo Scute"));
+		self::register("ender_eye", fn(IID $id) => new Item($id, "Ender Eye"));
+		self::register("trial_key", fn(IID $id) => new TrialKey($id, "Trial Key"));
+		self::register("ominous_trial_key", fn(IID $id) => new OminousTrialKey($id, "Ominous Trial Key"));
+		self::register("kelp", fn(IID $id) => new Kelp($id, "Kelp"));
+
+		self::register("brown_egg", fn(IID $id) => new Egg($id, "Brown Egg"));
+		self::register("blue_egg", fn(IID $id) => new Egg($id, "Blue Egg"));
+
+		foreach (BannerPatternType::cases() as $pattern) {
+			$key = strtolower($pattern->name);
+			self::register($key . "_banner_pattern", fn(IID $id) => (new BannerPattern($id, ucfirst(strtolower($pattern->name)) . " Banner Pattern"))->setType($pattern));
+		}
+
+		foreach (PotterySherdType::cases() as $sherd) {
+			$key = strtolower($sherd->name);
+			self::register($key . "_pottery_sherd", fn(IID $id) => (new PotterySherd($id, ucfirst(strtolower($sherd->name)) . " Pottery Sherd"))->setType($sherd));
 		}
 	}
 
@@ -373,6 +449,7 @@ final class VanillaItemsInputs extends RegistrySource{
 			self::register($idPrefix . "_pickaxe", fn(IID $id) => new Pickaxe($id, $namePrefix . " Pickaxe", $tier, [EnchantmentTags::PICKAXE]));
 			self::register($idPrefix . "_shovel", fn(IID $id) => new Shovel($id, $namePrefix . " Shovel", $tier, [EnchantmentTags::SHOVEL]));
 			self::register($idPrefix . "_sword", fn(IID $id) => new Sword($id, $namePrefix . " Sword", $tier, [EnchantmentTags::SWORD]));
+			self::register($idPrefix . "_spear", fn(IID $id) => new Spear($id, $namePrefix . " Spear", $tier, [EnchantmentTags::SPEAR]));
 		}
 	}
 

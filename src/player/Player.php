@@ -103,6 +103,7 @@ use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\enchantment\MeleeWeaponEnchantment;
 use pocketmine\item\Item;
 use pocketmine\item\ItemUseResult;
+use pocketmine\item\Mace;
 use pocketmine\item\Releasable;
 use pocketmine\lang\KnownTranslationFactory;
 use pocketmine\lang\Language;
@@ -126,7 +127,6 @@ use pocketmine\permission\PermissibleBase;
 use pocketmine\permission\PermissibleDelegateTrait;
 use pocketmine\player\chat\StandardChatFormatter;
 use pocketmine\Server;
-use pocketmine\ServerConfigGroup;
 use pocketmine\ServerProperties;
 use pocketmine\timings\Timings;
 use pocketmine\utils\AssumptionFailedError;
@@ -155,7 +155,6 @@ use function count;
 use function explode;
 use function floor;
 use function get_class;
-use function max;
 use function mb_strlen;
 use function microtime;
 use function min;
@@ -1615,8 +1614,15 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 				$this->blockBreakHandler?->update();
 			}
 
-			if($this->isUsingItem() && $this->getItemUseDuration() % 4 === 0 && ($item = $this->inventory->getItemInHand()) instanceof ConsumableItem){
-				$this->broadcastAnimation(new ConsumingItemAnimation($this, $item));
+			if ($this->isUsingItem()) {
+				$item = $this->inventory->getItemInHand();
+				if($this->getItemUseDuration() % 4 === 0 && $item instanceof ConsumableItem){
+					$this->broadcastAnimation(new ConsumingItemAnimation($this, $item));
+				}
+
+				if (!$this->hasItemCooldown($item)) {
+					$item->whileUsing($this);
+				}
 			}
 		}
 
@@ -2045,7 +2051,12 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 		$heldItem = $this->inventory->getItemInHand();
 		$oldItem = clone $heldItem;
 
-		$ev = new EntityDamageByEntityEvent($this, $entity, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $heldItem->getAttackPoints());
+		$damage = $heldItem->getAttackPoints();
+		if ($heldItem instanceof Mace) {
+			$damage = $heldItem->getAttackDamage($this);
+		}
+
+		$ev = new EntityDamageByEntityEvent($this, $entity, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $damage);
 		if(!$this->canInteract($entity->getLocation(), self::MAX_REACH_DISTANCE_ENTITY_INTERACTION)){
 			$this->logger->debug("Cancelled attack of entity " . $entity->getId() . " due to not currently being interactable");
 			$ev->cancel();
@@ -2091,6 +2102,8 @@ class Player extends Human implements CommandSender, ChunkListener, IPlayer, Nev
 			assert($type instanceof MeleeWeaponEnchantment);
 			$type->onPostAttack($this, $entity, $enchantment->getLevel());
 		}
+
+		$heldItem->onPostAttack($entity, $ev->getBaseDamage());
 
 		if($this->isAlive()){
 			//reactive damage like thorns might cause us to be killed by attacking another mob, which

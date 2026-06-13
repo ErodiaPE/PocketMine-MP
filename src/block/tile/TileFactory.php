@@ -80,6 +80,18 @@ final class TileFactory{
 		$this->register(MobHead::class, ["Skull", "minecraft:skull"]);
 		$this->register(GlowingItemFrame::class, ["GlowItemFrame"]);
 		$this->register(HangingSign::class, ["HangingSign", "minecraft:hanging_sign"]);
+		$this->register(BeeHive::class, ["Beehive", "minecraft:beehive"]);
+		$this->register(SculkSensor::class, ["CalibratedSculkSensor", "minecraft:calibrated_sculk_sensor"]);
+		$this->register(CommandBlock::class, ["CommandBlock", "minecraft:command_block"]);
+		$this->register(SculkCatalyst::class, ["SculkCatalyst", "minecraft:sculk_catalyst"]);
+		$this->register(SculkSensor::class, ["SculkSensor", "minecraft:sculk_sensor"]);
+		$this->register(SculkShrieker::class, ["SculkShrieker", "minecraft:sculk_shrieker"]);
+		$this->register(Shelf::class, ["Shelf", "minecraft:shelf"]);
+		$this->register(CopperGolem::class, ["CopperGolem", "minecraft:copper_golem"]);
+		$this->register(Dispenser::class, ["Dispenser", "minecraft:dispenser"]);
+		$this->register(Dropper::class, ["Dropper", "minecraft:dropper"]);
+		$this->register(Crafter::class, ["Crafter", "minecraft:crafter"]);
+		$this->register(Vault::class, ["Vault", "minecraft:vault"]);
 
 		//TODO: ChalkboardBlock
 		//TODO: ChemistryTable

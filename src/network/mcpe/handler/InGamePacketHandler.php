@@ -24,10 +24,14 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\handler;
 
 use pocketmine\block\BaseSign;
+use pocketmine\block\CommandBlock;
+use pocketmine\block\Crafter;
+use pocketmine\block\inventory\CommandBlockInventory;
 use pocketmine\block\Lectern;
+use pocketmine\block\tile\CommandBlock as CommandBlockTile;
+use pocketmine\block\tile\Crafter as CrafterTile;
 use pocketmine\block\tile\Sign;
 use pocketmine\block\utils\SignText;
-use pocketmine\entity\animation\ConsumingItemAnimation;
 use pocketmine\entity\Attribute;
 use pocketmine\entity\InvalidSkinException;
 use pocketmine\event\player\PlayerEditBookEvent;
@@ -36,6 +40,7 @@ use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\inventory\transaction\TransactionBuilder;
 use pocketmine\inventory\transaction\TransactionCancelledException;
 use pocketmine\inventory\transaction\TransactionValidationException;
+use pocketmine\item\Spear;
 use pocketmine\item\Sword;
 use pocketmine\item\VanillaItems;
 use pocketmine\item\WritableBook;
@@ -46,7 +51,6 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\FilterNoisyPacketException;
-use pocketmine\network\mcpe\convert\ItemTranslator;
 use pocketmine\network\mcpe\InventoryManager;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
@@ -77,6 +81,7 @@ use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
+use pocketmine\network\mcpe\protocol\PlayerToggleCrafterSlotRequestPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\serializer\BitSet;
 use pocketmine\network\mcpe\protocol\ServerSettingsRequestPacket;
@@ -86,7 +91,6 @@ use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\mcpe\protocol\SubClientLoginPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
-use pocketmine\network\mcpe\protocol\types\ActorEvent;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\network\mcpe\protocol\types\inventory\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\inventory\MismatchTransactionData;
@@ -552,6 +556,15 @@ class InGamePacketHandler extends PacketHandler{
 				}
 				$this->player->useHeldItem();
 				return true;
+			case UseItemTransactionData::ACTION_USE_AS_ATTACK:
+				$item = $this->player->getInventory()->getItemInHand();
+
+				if ($this->player->useHeldItem()) {
+					if ($item instanceof Spear) {
+						$item->onStab($this->player);
+					}
+				}
+				return true;
 		}
 
 		return false;
@@ -955,7 +968,34 @@ class InGamePacketHandler extends PacketHandler{
 	}
 
 	public function handleCommandBlockUpdate(CommandBlockUpdatePacket $packet) : bool{
-		return false; //TODO
+		if (!$this->player->getCurrentWindow() instanceof CommandBlockInventory) {
+			return false;
+		}
+
+		$pos = $packet->blockPosition;
+		$chunkX = $pos->getX() >> Chunk::COORD_BIT_SIZE;
+		$chunkZ = $pos->getZ() >> Chunk::COORD_BIT_SIZE;
+		$world = $this->player->getWorld();
+		if(!$world->isChunkLoaded($chunkX, $chunkZ) || $world->isChunkLocked($chunkX, $chunkZ)){
+			return false;
+		}
+
+		$block = $world->getBlockAt($pos->getX(), $pos->getY(), $pos->getZ());
+		if($block instanceof CommandBlock && $this->player->canInteract($block->getPosition(), 15)){
+			$block->setConditional($packet->isConditional);
+
+			$tile = $block->getPosition()->getWorld()->getTile($block->getPosition());
+			if ($tile instanceof CommandBlockTile) {
+				$tile->setCommand($packet->command);
+				$tile->setLastOutput($packet->lastOutput);
+				$tile->setCustomName($packet->name);
+				$tile->setTrackOutput($packet->shouldTrackOutput);
+				$tile->setTickDelay($packet->tickDelay);
+				$tile->setExecuteOnFirstTick($packet->executeOnFirstTick);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	public function handlePlayerSkin(PlayerSkinPacket $packet) : bool{
@@ -1155,5 +1195,25 @@ class InGamePacketHandler extends PacketHandler{
 	public function handleEmote(EmotePacket $packet) : bool{
 		$this->player->emote($packet->getEmoteId());
 		return true;
+	}
+
+	public function handlePlayerToggleCrafterSlotRequest(PlayerToggleCrafterSlotRequestPacket $packet) : bool{
+		$pos = $packet->getPosition();
+		$chunkX = $pos->getX() >> Chunk::COORD_BIT_SIZE;
+		$chunkZ = $pos->getZ() >> Chunk::COORD_BIT_SIZE;
+		$world = $this->player->getWorld();
+		if(!$world->isChunkLoaded($chunkX, $chunkZ) || $world->isChunkLocked($chunkX, $chunkZ)){
+			return false;
+		}
+
+		$block = $world->getBlockAt($pos->getX(), $pos->getY(), $pos->getZ());
+		if($block instanceof Crafter && $this->player->canInteract($block->getPosition(), 15)){
+			$tile = $block->getPosition()->getWorld()->getTile($block->getPosition());
+			if ($tile instanceof CrafterTile) {
+				$tile->setLocked($packet->getSlot(), $packet->isDisabled());
+			}
+			return true;
+		}
+		return false;
 	}
 }

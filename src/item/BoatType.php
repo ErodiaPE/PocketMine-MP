@@ -48,6 +48,9 @@ enum BoatType{
 	case ACACIA;
 	case DARK_OAK;
 	case MANGROVE;
+	case CHERRY;
+	case PALE_OAK;
+	case BAMBOO;
 
 	public function getWoodType() : WoodType{
 		return match($this){
@@ -58,6 +61,9 @@ enum BoatType{
 			self::ACACIA => WoodType::ACACIA,
 			self::DARK_OAK => WoodType::DARK_OAK,
 			self::MANGROVE => WoodType::MANGROVE,
+			self::CHERRY => WoodType::CHERRY,
+			self::PALE_OAK => WoodType::PALE_OAK,
+			self::BAMBOO => WoodType::BAMBOO,
 		};
 	}
 

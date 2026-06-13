@@ -2,7 +2,7 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
+ * ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
  * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
@@ -54,10 +54,10 @@ abstract class FillableCauldron extends Transparent{
 
 	protected function recalculateCollisionBoxes() : array{
 		$result = [
-			AxisAlignedBB::one()->trim(Facing::UP, 11 / 16) //bottom of the cauldron
+			AxisAlignedBB::one()->trim(Facing::UP, 11 / 16)
 		];
 
-		foreach(Facing::HORIZONTAL as $f){ //add the frame parts around the bowl
+		foreach(Facing::HORIZONTAL as $f){
 			$result[] = AxisAlignedBB::one()->trim($f, 14 / 16);
 		}
 		return $result;
@@ -100,14 +100,8 @@ abstract class FillableCauldron extends Transparent{
 		$returnedItems[] = $returnedItem;
 	}
 
-	/**
-	 * Returns the sound played when adding levels to the cauldron liquid.
-	 */
 	abstract public function getFillSound() : Sound;
 
-	/**
-	 * Returns the sound played when removing levels from the cauldron liquid.
-	 */
 	abstract public function getEmptySound() : Sound;
 
 	/**
@@ -123,5 +117,11 @@ abstract class FillableCauldron extends Transparent{
 
 	public function asItem() : Item{
 		return VanillaBlocks::CAULDRON()->asItem();
+	}
+
+	public function fillWithLava() : void{
+		$world = $this->position->getWorld();
+		$lavaCauldron = VanillaBlocks::LAVA_CAULDRON()->setFillLevel(self::MAX_FILL_LEVEL);
+		$world->setBlock($this->position, $lavaCauldron);
 	}
 }

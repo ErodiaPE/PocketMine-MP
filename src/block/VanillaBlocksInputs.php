@@ -39,8 +39,13 @@ use pocketmine\block\tile\Campfire as TileCampfire;
 use pocketmine\block\tile\Cauldron as TileCauldron;
 use pocketmine\block\tile\Chest as TileChest;
 use pocketmine\block\tile\ChiseledBookshelf as TileChiseledBookshelf;
+use pocketmine\block\tile\CommandBlock as CommandBlockTile;
 use pocketmine\block\tile\Comparator as TileComparator;
+use pocketmine\block\tile\CopperGolem as CopperGolemTile;
+use pocketmine\block\tile\Crafter as CrafterTile;
 use pocketmine\block\tile\DaylightSensor as TileDaylightSensor;
+use pocketmine\block\tile\Dispenser as DispenserTile;
+use pocketmine\block\tile\Dropper as DropperTile;
 use pocketmine\block\tile\EnchantTable as TileEnchantingTable;
 use pocketmine\block\tile\EnderChest as TileEnderChest;
 use pocketmine\block\tile\FlowerPot as TileFlowerPot;
@@ -54,10 +59,15 @@ use pocketmine\block\tile\MobHead as TileMobHead;
 use pocketmine\block\tile\MonsterSpawner as TileMonsterSpawner;
 use pocketmine\block\tile\NormalFurnace as TileNormalFurnace;
 use pocketmine\block\tile\Note as TileNote;
+use pocketmine\block\tile\SculkCatalyst as SculkCatalystTile;
+use pocketmine\block\tile\SculkSensor as SculkSensorTile;
+use pocketmine\block\tile\SculkShrieker as SculkShriekerTile;
+use pocketmine\block\tile\Shelf as ShelfTile;
 use pocketmine\block\tile\ShulkerBox as TileShulkerBox;
 use pocketmine\block\tile\Sign as TileSign;
 use pocketmine\block\tile\Smoker as TileSmoker;
 use pocketmine\block\tile\Tile;
+use pocketmine\block\tile\Vault as VaultTile;
 use pocketmine\block\utils\AmethystTrait;
 use pocketmine\block\utils\LeavesType;
 use pocketmine\block\utils\SaplingType;
@@ -192,10 +202,16 @@ final class VanillaBlocksInputs extends RegistrySource{
 
 		self::register("cobweb", fn(BID $id) => new Cobweb($id, "Cobweb", new Info(new BreakInfo(4.0, ToolType::SWORD | ToolType::SHEARS, 1))));
 		self::register("cocoa_pod", fn(BID $id) => new CocoaBlock($id, "Cocoa Block", new Info(BreakInfo::axe(0.2, null, 15.0))));
-		self::register("coral_block", fn(BID $id) => new CoralBlock($id, "Coral Block", new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0))));
 		self::register("daylight_sensor", fn(BID $id) => new DaylightSensor($id, "Daylight Sensor", new Info(BreakInfo::axe(0.2))), TileDaylightSensor::class);
 		self::register("dead_bush", fn(BID $id) => new DeadBush($id, "Dead Bush", new Info(BreakInfo::instant(ToolType::SHEARS, 1), [Tags::POTTABLE_PLANTS])));
 		self::register("detector_rail", fn(BID $id) => new DetectorRail($id, "Detector Rail", $railBreakInfo));
+
+		self::register("coral_block", fn(BID $id) => new CoralBlock($id, "Coral Block", new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0))));
+		self::register("dead_tube_coral_block", fn(BID $id) => new CoralBlock($id, "Dead Tube Coral Block", new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0))));
+		self::register("dead_brain_coral_block", fn(BID $id) => new CoralBlock($id, "Dead Brain Coral Block", new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0))));
+		self::register("dead_bubble_coral_block", fn(BID $id) => new CoralBlock($id, "Dead Bubble Coral Block", new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0))));
+		self::register("dead_fire_coral_block", fn(BID $id) => new CoralBlock($id, "Dead Fire Coral Block", new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0))));
+		self::register("dead_horn_coral_block", fn(BID $id) => new CoralBlock($id, "Dead Horn Coral Block", new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0))));
 
 		self::register("diamond", fn(BID $id) => new Opaque($id, "Diamond Block", new Info(BreakInfo::pickaxe(5.0, ToolTier::IRON, 30.0))));
 		self::register("dirt", fn(BID $id) => new Dirt($id, "Dirt", new Info(BreakInfo::shovel(0.5), [Tags::DIRT])));
@@ -226,6 +242,16 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("fire", fn(BID $id) => new Fire($id, "Fire Block", new Info(BreakInfo::instant(), [Tags::FIRE])));
 
 		$flowerTypeInfo = new Info(BreakInfo::instant(), [Tags::POTTABLE_PLANTS]);
+		self::register("closed_eyeblossom", fn(BID $id) => new ClosedEyeblossom($id, "Closed Eyeblossom", new Info(BreakInfo::instant())));
+		self::register("open_eyeblossom", fn(BID $id) => new OpenEyeblossom($id, "Open Eyeblossom", new Info(BreakInfo::instant())));
+		self::register("wildflowers", fn(BID $id) => new Flower($id, "Wildflowers", new Info(BreakInfo::instant())));
+		self::register("short_dry_grass", fn(BID $id) => new ShortDryGrass($id, "Short Dry Grass", new Info(BreakInfo::instant())));
+		self::register("tall_dry_grass", fn(BID $id) => new TallDryGrass($id, "Tall Dry Grass", new Info(BreakInfo::instant())));
+		self::register("bush", fn(BID $id) => new Bush($id, "Bush", new Info(BreakInfo::instant())));
+		self::register("leaf_litter", fn(BID $id) => new LeafLitter($id, "Leaf Litter", new Info(BreakInfo::instant())));
+		self::register("seagrass", fn(BID $id) => new SeaGrass($id, "Seagrass", new Info(BreakInfo::instant())));
+
+		self::register("golden_dandelion", fn(BID $id) => new Flower($id, "Golden Dandelion", $flowerTypeInfo));
 		self::register("dandelion", fn(BID $id) => new Flower($id, "Dandelion", $flowerTypeInfo));
 		self::register("poppy", fn(BID $id) => new Flower($id, "Poppy", $flowerTypeInfo));
 		self::register("allium", fn(BID $id) => new Flower($id, "Allium", $flowerTypeInfo));
@@ -257,6 +283,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("grass", fn(BID $id) => new Grass($id, "Grass", new Info(BreakInfo::shovel(0.6), [Tags::DIRT])));
 		self::register("grass_path", fn(BID $id) => new GrassPath($id, "Grass Path", new Info(BreakInfo::shovel(0.65))));
 		self::register("gravel", fn(BID $id) => new Gravel($id, "Gravel", new Info(BreakInfo::shovel(0.6))));
+		self::register("suspicious_gravel", fn(BID $id) => new SuspiciousGravel($id, "Suspicious Gravel", new Info(BreakInfo::shovel(0.25, blastResistance: 1.25))));
 
 		self::register("hardened_clay", fn(BID $id) => new HardenedClay($id, "Hardened Clay", new Info(BreakInfo::pickaxe(1.25, ToolTier::WOOD, 21.0))));
 
@@ -367,6 +394,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 		$sandTypeInfo = new Info(BreakInfo::shovel(0.5), [Tags::SAND]);
 		self::register("sand", fn(BID $id) => new Sand($id, "Sand", $sandTypeInfo));
 		self::register("red_sand", fn(BID $id) => new Sand($id, "Red Sand", $sandTypeInfo));
+		self::register("suspicious_sand", fn(BID $id) => new SuspiciousSand($id, "Suspicious Sand", new Info(BreakInfo::shovel(0.25, blastResistance: 1.25))));
 
 		self::register("sea_lantern", fn(BID $id) => new SeaLantern($id, "Sea Lantern", new Info(new BreakInfo(0.3))));
 		self::register("sea_pickle", fn(BID $id) => new SeaPickle($id, "Sea Pickle", new Info(BreakInfo::instant())));
@@ -380,18 +408,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("shulker_box", fn(BID $id) => new ShulkerBox($id, "Shulker Box", $shulkerBoxBreakInfo), TileShulkerBox::class);
 
 		$stoneBreakInfo = new Info(BreakInfo::pickaxe(1.5, ToolTier::WOOD, 30.0));
-		$stone = self::register(
-			"stone",
-			fn(BID $id) => new class($id, "Stone", $stoneBreakInfo) extends Opaque{
-				public function getDropsForCompatibleTool(Item $item) : array{
-					return [VanillaBlocks::COBBLESTONE()->asItem()];
-				}
-
-				public function isAffectedBySilkTouch() : bool{
-					return true;
-				}
-			}
-		);
+		$stone = self::register("stone", fn(BID $id) => new Stone($id, "Stone", $stoneBreakInfo));
 		self::register("andesite", fn(BID $id) => new Opaque($id, "Andesite", $stoneBreakInfo));
 		self::register("diorite", fn(BID $id) => new Opaque($id, "Diorite", $stoneBreakInfo));
 		self::register("granite", fn(BID $id) => new Opaque($id, "Granite", $stoneBreakInfo));
@@ -604,6 +621,11 @@ final class VanillaBlocksInputs extends RegistrySource{
 			"Wall Coral Fan",
 			new Info(BreakInfo::instant()),
 		));
+		self::register("dead_tube_coral", fn(BID $id) => new Coral($id, "Dead Tube Coral", new Info(BreakInfo::instant())));
+		self::register("dead_brain_coral", fn(BID $id) => new Coral($id, "Dead Brain Coral", new Info(BreakInfo::instant())));
+		self::register("dead_bubble_coral", fn(BID $id) => new Coral($id, "Dead Bubble Coral", new Info(BreakInfo::instant())));
+		self::register("dead_fire_coral", fn(BID $id) => new Coral($id, "Dead Fire Coral", new Info(BreakInfo::instant())));
+		self::register("dead_horn_coral", fn(BID $id) => new Coral($id, "Dead Horn Coral", new Info(BreakInfo::instant())));
 
 		self::register("mangrove_roots", fn(BID $id) => new MangroveRoots($id, "Mangrove Roots", new Info(BreakInfo::axe(0.7))));
 		self::register("muddy_mangrove_roots", fn(BID $id) => new SimplePillar($id, "Muddy Mangrove Roots", new Info(BreakInfo::shovel(0.7), [Tags::MUD])));
@@ -630,6 +652,67 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::registerOres();
 		self::registerWoodenBlocks();
 		self::registerCauldronBlocks();
+
+		self::registerShelfs();
+		self::registerCommandBlocks();
+		self::registerSculks();
+		self::registerCopperChests();
+
+		self::register("moss_block", fn(BID $id) => new MossBlock($id, "Moss", new Info(BreakInfo::shovel(0.1, blastResistance: 2.5), [Tags::DIRT])));
+		self::register("moss_carpet", fn(BID $id) => new MossCarpet($id, "Moss Carpet", new Info(BreakInfo::shovel(0.1), [Tags::DIRT])));
+		self::register("pale_moss_block", fn(BID $id) => new PaleMossBlock($id, "Pale Moss Block", new Info(BreakInfo::shovel(0.1, blastResistance: 2.5), [Tags::DIRT])));
+		self::register("pale_moss_carpet", fn(BID $id) => new PaleMossCarpet($id, "Pale Moss Carpet", new Info(BreakInfo::shovel(0.1), [Tags::DIRT])));
+		self::register("pale_hanging_moss", fn(BID $id) => new PaleHangingMoss($id, "Pale Hanging Moss", new Info(BreakInfo::instant())));
+
+		self::register("target", fn(BID $id) => new Target($id, "Target", new Info(new BreakInfo(0.5))));
+		self::register("turtle_egg", fn(BID $id) => new TurtleEgg($id, "Turtle Egg", new Info(BreakInfo::instant())));
+		self::register("powder_snow", fn(BID $id) => new PowderSnow($id, "Powder Snow", new Info(new BreakInfo(0.25, blastResistance: 0.1))));
+		self::register("scaffolding", fn(BID $id) => new Scaffolding($id, "Scaffolding", new Info(new BreakInfo(0.5, blastResistance: 0))));
+		self::register("kelp", fn(BID $id) => new Kelp($id, "Kelp", new Info(BreakInfo::instant())));
+
+		self::register("firefly_bush", fn(BID $id) => new FireflyBush($id, "Firefly Bush", new Info(BreakInfo::instant())));
+		self::register("creaking_heart", fn(BID $id) => new CreakingHeart($id, "Creaking Heart", new Info(BreakInfo::instant())));
+		self::register("beehive", fn(BID $id) => new BeeHive($id, "Beehive", new Info(BreakInfo::axe(0.6))));
+		self::register("bee_nest", fn(BID $id) => new BeeNest($id, "Bee Nest", new Info(BreakInfo::axe(0.3))));
+		self::register("lodestone", fn(BID $id) => new Lodestone($id, "Lodestone", new Info(BreakInfo::pickaxe(2))));
+		self::register("grindstone", fn(BID $id) => new Grindstone($id, "Grindstone", new Info(BreakInfo::pickaxe(2, blastResistance: 6))));
+		self::register("composter", fn(BID $id) => new Composter($id, "Composter", new Info(BreakInfo::pickaxe(0.6))));
+		self::register("conduit", fn(BID $id) => new Conduit($id, "Conduit", new Info(BreakInfo::pickaxe(3))));
+		self::register("heavy_core", fn(BID $id) => new HeavyCore($id, "Heavy Core", new Info(BreakInfo::pickaxe(10))));
+		self::register("observer", fn(BID $id) => new Observer($id, "Observer", new Info(BreakInfo::pickaxe(3.5))));
+		self::register("dropper", fn(BID $id) => new Dropper($id, "Dropper", new Info(BreakInfo::pickaxe(3.5))), DropperTile::class);
+		self::register("dispenser", fn(BID $id) => new Dispenser($id, "Dropper", new Info(BreakInfo::pickaxe(3.5))), DispenserTile::class);
+		self::register("crafter", fn(BID $id) => new Crafter($id, "Crafter", new Info(BreakInfo::pickaxe(1.5))), CrafterTile::class);
+
+		self::register("piston", fn(BID $id) => new Piston($id, "Piston", new Info(BreakInfo::axe(1.5))));
+		self::register("sticky_piston", fn(BID $id) => new StickyPiston($id, "Sticky Piston", new Info(BreakInfo::axe(1.5))));
+		self::register("decorated_pot", fn(BID $id) => new DecoratedPot($id, "Decorated Pot", new Info(BreakInfo::pickaxe(1))));
+		self::register("pointed_dripstone", fn(BID $id) => new PointedDripstone($id, "Pointed Dripstone", new Info(BreakInfo::pickaxe(1.5))));
+		self::register("dripstone_block", fn(BID $id) => new Dripstone($id, "Dripstone", new Info(BreakInfo::pickaxe(1.5))));
+		self::register("trial_spawner", fn(BID $id) => new TrialSpawner($id, "Trial Spawner", new Info(BreakInfo::pickaxe(50))));
+		self::register("vault", fn(BID $id) => new Vault($id, "Vault", new Info(BreakInfo::pickaxe(50))), VaultTile::class);
+		self::register("dried_ghast", fn(BID $id) => new DriedGhast($id, "Dried Ghast", new Info(BreakInfo::pickaxe(1))));
+		self::register("sniffer_egg", fn(BID $id) => new SnifferEgg($id, "Sniffer Egg", new Info(BreakInfo::axe(1))));
+		self::register("frog_spawn", fn(BID $id) => new Frogspawn($id, "Frog Spawn", new Info(BreakInfo::instant())));
+
+		foreach([
+			"copper_golem_statue" => "Copper Golem Statue",
+			"exposed_copper_golem_statue" => "Exposed Copper Golem Statue",
+			"weathered_copper_golem_statue" => "Weathered Copper Golem Statue",
+			"oxidised_copper_golem_statue" => "Oxidised Copper Golem Statue",
+			"waxed_copper_golem_statue" => "Waxed Copper Golem Statue",
+			"waxed_exposed_copper_golem_statue" => "Waxed Exposed Copper Golem Statue",
+			"waxed_weathered_copper_golem_statue" => "Waxed Weathered Copper Golem Statue",
+			"waxed_oxidised_copper_golem_statue" => "Waxed Oxidised Copper Golem Statue",
+		] as $id => $name){
+			$args = [
+				$id,
+				fn(BID $bid) => new CopperGolem($bid, $name, new Info(BreakInfo::pickaxe(3.0))),
+				CopperGolemTile::class
+			];
+
+			self::register(...$args);
+		}
 	}
 
 	/**
@@ -907,6 +990,7 @@ final class VanillaBlocksInputs extends RegistrySource{
 
 	private function registerBlocksR14() : void{
 		self::register("honeycomb", fn(BID $id) => new Opaque($id, "Honeycomb Block", new Info(new BreakInfo(0.6))));
+		self::register("honey_block", fn(BID $id) => new HoneyBlock($id, "Honey Block", new Info(BreakInfo::instant())));
 	}
 
 	private function registerBlocksR16() : void{
@@ -1004,41 +1088,33 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("raw_iron", fn(BID $id) => new Opaque($id, "Raw Iron Block", new Info(BreakInfo::pickaxe(5, ToolTier::STONE, 30.0))));
 
 		$deepslateBreakInfo = new Info(BreakInfo::pickaxe(3, ToolTier::WOOD, 30.0));
-		$deepslate = self::register("deepslate", fn(BID $id) => new class($id, "Deepslate", $deepslateBreakInfo) extends SimplePillar{
-			public function getDropsForCompatibleTool(Item $item) : array{
-				return [VanillaBlocks::COBBLED_DEEPSLATE()->asItem()];
-			}
-
-			public function isAffectedBySilkTouch() : bool{
-				return true;
-			}
-		});
+		$deepslate = self::register("deepslate", fn(BID $id) => new Deepslate($id, "Deepslate", $deepslateBreakInfo));
 
 		//TODO: parity issue here - in Java this has a hardness of 3.0, but in bedrock it's 3.5
-		self::register("chiseled_deepslate", fn(BID $id) => new Opaque($id, "Chiseled Deepslate", new Info(BreakInfo::pickaxe(3.5, ToolTier::WOOD, 30.0))));
+		self::register("chiseled_deepslate", fn(BID $id) => new Deepslate($id, "Chiseled Deepslate", new Info(BreakInfo::pickaxe(3.5, ToolTier::WOOD, 30.0))));
 
 		$deepslateBrickBreakInfo = new Info(BreakInfo::pickaxe(3.5, ToolTier::WOOD, 30.0));
-		self::register("deepslate_bricks", fn(BID $id) => new Opaque($id, "Deepslate Bricks", $deepslateBrickBreakInfo));
+		self::register("deepslate_bricks", fn(BID $id) => new Deepslate($id, "Deepslate Bricks", $deepslateBrickBreakInfo));
 		self::register("deepslate_brick_slab", fn(BID $id) => new Slab($id, "Deepslate Brick", $deepslateBrickBreakInfo));
 		self::register("deepslate_brick_stairs", fn(BID $id) => new Stair($id, "Deepslate Brick Stairs", $deepslateBrickBreakInfo));
 		self::register("deepslate_brick_wall", fn(BID $id) => new Wall($id, "Deepslate Brick Wall", $deepslateBrickBreakInfo));
 		self::register("cracked_deepslate_bricks", fn(BID $id) => new Opaque($id, "Cracked Deepslate Bricks", $deepslateBrickBreakInfo));
 
 		$deepslateTilesBreakInfo = new Info(BreakInfo::pickaxe(3.5, ToolTier::WOOD, 30.0));
-		self::register("deepslate_tiles", fn(BID $id) => new Opaque($id, "Deepslate Tiles", $deepslateTilesBreakInfo));
+		self::register("deepslate_tiles", fn(BID $id) => new Deepslate($id, "Deepslate Tiles", $deepslateTilesBreakInfo));
 		self::register("deepslate_tile_slab", fn(BID $id) => new Slab($id, "Deepslate Tile", $deepslateTilesBreakInfo));
 		self::register("deepslate_tile_stairs", fn(BID $id) => new Stair($id, "Deepslate Tile Stairs", $deepslateTilesBreakInfo));
 		self::register("deepslate_tile_wall", fn(BID $id) => new Wall($id, "Deepslate Tile Wall", $deepslateTilesBreakInfo));
 		self::register("cracked_deepslate_tiles", fn(BID $id) => new Opaque($id, "Cracked Deepslate Tiles", $deepslateTilesBreakInfo));
 
 		$cobbledDeepslateBreakInfo = new Info(BreakInfo::pickaxe(3.5, ToolTier::WOOD, 30.0));
-		self::register("cobbled_deepslate", fn(BID $id) => new Opaque($id, "Cobbled Deepslate", $cobbledDeepslateBreakInfo));
+		self::register("cobbled_deepslate", fn(BID $id) => new Deepslate($id, "Cobbled Deepslate", $cobbledDeepslateBreakInfo));
 		self::register("cobbled_deepslate_slab", fn(BID $id) => new Slab($id, "Cobbled Deepslate", $cobbledDeepslateBreakInfo));
 		self::register("cobbled_deepslate_stairs", fn(BID $id) => new Stair($id, "Cobbled Deepslate Stairs", $cobbledDeepslateBreakInfo));
 		self::register("cobbled_deepslate_wall", fn(BID $id) => new Wall($id, "Cobbled Deepslate Wall", $cobbledDeepslateBreakInfo));
 
 		$polishedDeepslateBreakInfo = new Info(BreakInfo::pickaxe(3.5, ToolTier::WOOD, 30.0));
-		self::register("polished_deepslate", fn(BID $id) => new Opaque($id, "Polished Deepslate", $polishedDeepslateBreakInfo));
+		self::register("polished_deepslate", fn(BID $id) => new Deepslate($id, "Polished Deepslate", $polishedDeepslateBreakInfo));
 		self::register("polished_deepslate_slab", fn(BID $id) => new Slab($id, "Polished Deepslate", $polishedDeepslateBreakInfo));
 		self::register("polished_deepslate_stairs", fn(BID $id) => new Stair($id, "Polished Deepslate Stairs", $polishedDeepslateBreakInfo));
 		self::register("polished_deepslate_wall", fn(BID $id) => new Wall($id, "Polished Deepslate Wall", $polishedDeepslateBreakInfo));
@@ -1135,5 +1211,67 @@ final class VanillaBlocksInputs extends RegistrySource{
 		self::register("water_cauldron", fn(BID $id) => new WaterCauldron($id, "Water Cauldron", $cauldronBreakInfo), TileCauldron::class);
 		self::register("lava_cauldron", fn(BID $id) => new LavaCauldron($id, "Lava Cauldron", $cauldronBreakInfo), TileCauldron::class);
 		self::register("potion_cauldron", fn(BID $id) => new PotionCauldron($id, "Potion Cauldron", $cauldronBreakInfo), TileCauldron::class);
+	}
+
+	private function registerShelfs() : void{
+		foreach ([
+			"oak" => "Oak",
+			"spruce" => "Spruce",
+			"birch" => "Birch",
+			"jungle" => "Jungle",
+			"acacia" => "Acacia",
+			"dark_oak" => "Dark Oak",
+			"mangrove" => "Mangrove",
+			"cherry" => "Cherry",
+			"pale_oak" => "Pale Oak",
+			"bamboo" => "Bamboo",
+			"crimson" => "Crimson",
+			"warped" => "Warped"
+		] as $key => $label) {
+			self::register(
+				"{$key}_shelf",
+				fn(BID $id) => new Shelf(
+					$id,
+					"{$label} Shelf",
+					new Info(BreakInfo::axe(1.5))
+				),
+				ShelfTile::class
+			);
+		}
+	}
+
+	private function registerCommandBlocks() : void{
+		self::register("command_block", fn(BID $id) => new CommandBlock($id, "Command Block", new Info(BreakInfo::indestructible())), CommandBlockTile::class);
+		self::register("chain_command_block", fn(BID $id) => new CommandBlock($id, "Chain Command Block", new Info(BreakInfo::indestructible())), CommandBlockTile::class);
+		self::register("repeating_command_block", fn(BID $id) => new CommandBlock($id, "Repeating Command Block", new Info(BreakInfo::indestructible())), CommandBlockTile::class);
+	}
+
+	private function registerSculks() : void{
+		self::register("sculk_catalyst", fn(BID $id) => new SculkCatalyst($id, "Sculk Catalyst", new Info(new BreakInfo(3.0, blastResistance: 3))), SculkCatalystTile::class);
+		self::register("sculk_sensor", fn(BID $id) => new SculkSensor($id, "Sculk Sensor", new Info(new BreakInfo(3.0, blastResistance: 3))), SculkSensorTile::class);
+		self::register("calibrated_sculk_sensor", fn(BID $id) => new CalibratedSculkSensor($id, "Calibrated Sculk Sensor", new Info(new BreakInfo(3.0, blastResistance: 3))), SculkSensorTile::class);
+		self::register("sculk_shrieker", fn(BID $id) => new SculkShrieker($id, "Sculk Shrieker", new Info(new BreakInfo(3.0, blastResistance: 3))), SculkShriekerTile::class);
+		self::register("sculk_vein", fn(BID $id) => new SculkVein($id, "Sculk Vein", new Info(new BreakInfo(3.0, blastResistance: 3))));
+	}
+
+	private function registerCopperChests() : void{
+		foreach([
+			"copper_chest" => "Copper Chest",
+			"exposed_copper_chest" => "Exposed Copper Chest",
+			"weathered_copper_chest" => "Weathered Copper Chest",
+			"oxidised_copper_chest" => "Oxidised Copper Chest",
+			"waxed_copper_chest" => "Waxed Copper Chest",
+			"waxed_exposed_copper_chest" => "Waxed Exposed Copper Chest",
+			"waxed_weathered_copper_chest" => "Waxed Weathered Copper Chest",
+			"waxed_oxidised_copper_chest" => "Waxed Oxidised Copper Chest",
+		] as $id => $name){
+			$args = [
+				$id,
+				fn(BID $bid) => new CooperChest($bid, $name, new Info(BreakInfo::pickaxe(3.0))),
+				TileChest::class
+			];
+
+			self::register(...$args);
+		}
 	}
 }

@@ -30,14 +30,11 @@ use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\types\skin\SkinData;
 use pocketmine\network\mcpe\protocol\types\skin\SkinImage;
-use pocketmine\Server;
 use Symfony\Component\Filesystem\Path;
 use function is_array;
 use function is_string;
 use function json_decode;
 use function json_encode;
-use function random_bytes;
-use function str_repeat;
 use const JSON_THROW_ON_ERROR;
 
 class VanillaSkinAdapter implements SkinAdapter{

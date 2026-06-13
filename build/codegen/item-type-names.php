@@ -108,6 +108,6 @@ if($raw === false){
 
 $dictionary = ItemTypeDictionaryFromDataHelper::loadFromString($raw);
 $blockItemIdMap = BlockItemIdMap::getInstance();
-generateItemIds($dictionary, $blockItemIdMap);
+generateItemTypeIds($dictionary, $blockItemIdMap);
 
 echo "Done. Don't forget to run CS fixup after generating code.\n";

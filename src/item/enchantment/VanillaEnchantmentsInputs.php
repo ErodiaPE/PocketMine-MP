@@ -278,6 +278,29 @@ final class VanillaEnchantmentsInputs extends RegistrySource{
 			fn(int $level) : int => 10 * $level,
 			5
 		));
+		self::register("LUNGE", new Enchantment(
+			KnownTranslationFactory::enchantment_lunge(),
+			Rarity::UNCOMMON,
+			0,
+			0,
+			3,
+			fn(int $level) : int => 8 * ($level - 1) + 5,
+			50
+		));
+		self::register("MULTISHOT", new Enchantment(
+			KnownTranslationFactory::enchantment_crossbowMultishot(),
+			Rarity::MYTHIC,
+			0,
+			0,
+			1
+		));
+		self::register("QUICK_CHARGE", new Enchantment(
+			KnownTranslationFactory::enchantment_crossbowQuickCharge(),
+			Rarity::MYTHIC,
+			0,
+			0,
+			3
+		));
 	}
 
 	protected function register(string $name, Enchantment $member) : void{

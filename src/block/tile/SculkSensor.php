@@ -1,0 +1,65 @@
+<?php
+
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+ */
+
+declare(strict_types=1);
+
+namespace pocketmine\block\tile;
+
+use pocketmine\nbt\tag\CompoundTag;
+
+class SculkSensor extends Spawnable{
+	public const TAG_VIBRATION_LISTENER = "VibrationListener";
+	public const TAG_VIBRATION_EVENT = "event";
+	public const TAG_VIBRATION_SELECTOR = "selector";
+	public const TAG_IS_MOVABLE = "isMovable";
+
+	private bool $isMovable = false;
+
+	public function readSaveData(CompoundTag $nbt) : void{
+		$this->isMovable = (bool)$nbt->getByte(self::TAG_IS_MOVABLE, 0);
+	}
+
+	/**
+	 * @param CompoundTag $nbt
+	 *
+	 * @return void
+	 */
+	protected function writeSaveData(CompoundTag $nbt) : void{
+		$nbt->setTag(self::TAG_VIBRATION_LISTENER, CompoundTag::create()
+			->setInt(self::TAG_VIBRATION_EVENT, 6)
+			->setTag(self::TAG_VIBRATION_SELECTOR, CompoundTag::create())
+		);
+		$nbt->setByte(self::TAG_IS_MOVABLE, (int)$this->isMovable);
+	}
+
+	/**
+	 * @param CompoundTag $nbt
+	 *
+	 * @return void
+	 */
+	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
+		$nbt->setTag(self::TAG_VIBRATION_LISTENER, CompoundTag::create()
+			->setInt(self::TAG_VIBRATION_EVENT, 6)
+			->setTag(self::TAG_VIBRATION_SELECTOR, CompoundTag::create())
+		);
+		$nbt->setByte(self::TAG_IS_MOVABLE, (int)$this->isMovable);
+	}
+}

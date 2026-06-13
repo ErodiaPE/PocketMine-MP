@@ -26,7 +26,6 @@ namespace pocketmine\event\player;
 use pocketmine\entity\Entity;
 use pocketmine\event\Cancellable;
 use pocketmine\event\CancellableTrait;
-use pocketmine\lang\Translatable;
 use pocketmine\player\Player;
 
 /**

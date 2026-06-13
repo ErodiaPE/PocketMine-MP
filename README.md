@@ -1,84 +1,84 @@
 <p align="center">
-	<a href="https://pmmp.io">
-		<!--[if IE]>
-			<img src="https://github.com/pmmp/PocketMine-MP/blob/stable/.github/readme/pocketmine.png" alt="The PocketMine-MP logo" title="PocketMine" loading="eager" />
-		<![endif]-->
-		<picture>
-			<source srcset="https://raw.githubusercontent.com/pmmp/PocketMine-MP/stable/.github/readme/pocketmine-dark-rgb.gif" media="(prefers-color-scheme: dark)">
-			<img src="https://raw.githubusercontent.com/pmmp/PocketMine-MP/stable/.github/readme/pocketmine-rgb.gif" loading="eager" />
-		</picture>
-	</a><br>
-	<b>A highly customisable, open source server software for Minecraft: Bedrock Edition written in PHP</b>
+<a href="https://pmmp.io">
+<picture>
+  <source srcset="https://raw.githubusercontent.com/ErodiaPE/Pokkit/stable/.github/readme/pokkit-dark-rgb.gif" media="(prefers-color-scheme: dark)">
+  <img src="https://raw.githubusercontent.com/ErodiaPE/Pokkit/stable/.github/readme/pokkit-rgb.gif" loading="eager" />
+</picture>
+</a><br>
+<b>A high-performance, feature-complete fork of PocketMine-MP for Minecraft: Bedrock Edition</b>
 </p>
 
 <p align="center">
-	<a href="https://github.com/pmmp/PocketMine-MP/actions/workflows/main.yml"><img src="https://github.com/pmmp/PocketMine-MP/actions/workflows/main.yml/badge.svg" alt="CI" /></a>
-	<a href="https://github.com/pmmp/PocketMine-MP/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/pmmp/PocketMine-MP?label=release&sort=semver"></a>
-	<a href="https://discord.gg/bmSAZBG"><img src="https://img.shields.io/discord/373199722573201408?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
-	<br>
-	<a href="https://github.com/pmmp/PocketMine-MP/releases"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/pmmp/PocketMine-MP/total?label=downloads%40total"></a>
-	<a href="https://github.com/pmmp/PocketMine-MP/releases/latest"><img alt="GitHub release (latest by SemVer)" src="https://img.shields.io/github/downloads/pmmp/PocketMine-MP/latest/total?sort=semver"></a>
+<a href="https://github.com/ErodiaPE/Pokkit/actions/workflows/main.yml"><img src="https://github.com/ErodiaPE/Pokkit/actions/workflows/main.yml/badge.svg" alt="CI" /></a>
+<a href="https://github.com/ErodiaPE/Pokkit/releases/latest"><img alt="GitHub release (latest SemVer)" src="https://img.shields.io/github/v/release/ErodiaPE/Pokkit?label=release&sort=semver"></a>
+<a href="https://discord.gg/bmSAZBG"><img src="https://img.shields.io/discord/373199722573201408?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
+<br>
+<a href="https://github.com/ErodiaPE/Pokkit/releases"><img alt="GitHub all releases" src="https://img.shields.io/github/downloads/ErodiaPE/Pokkit/total?label=downloads%40total"></a>
+<a href="https://github.com/ErodiaPE/Pokkit/releases/latest"><img alt="GitHub release (latest by SemVer)" src="https://img.shields.io/github/downloads/ErodiaPE/Pokkit/latest/total?sort=semver"></a>
 </p>
 
-## What is this?
-PocketMine-MP is a highly customisable server software for Minecraft: Bedrock Edition, built from scratch in PHP, with over 10 years of history.
+---
 
-If you're looking to create a Minecraft: Bedrock server with **custom functionality**, look no further.
+## What is Pokkit?
 
-- 🧩 **Powerful plugin API** - extend and customise gameplay as you see fit
-- 🗺️ **Rich ecosystem** and **large developer community** - find plugins easily and learn to develop your own
-- 🌐 **Multi-world support** - offer a more varied game experience to players without transferring them to other server nodes
-- 🏎️ **Performance** - get 100+ players onto one server (depending on hardware and plugins)
-- ⤴️ **Continuously updated** - new Minecraft versions are usually supported within days
+**Pokkit** is a highly customized, open-source server software for Minecraft: Bedrock Edition written in PHP. It is a powerful **fork of PocketMine-MP** designed to bridge the gap between custom plugin flexibility and vanilla content completeness.
 
-## :x: PocketMine-MP is NOT a vanilla Minecraft server software.
-**It is poorly suited to hosting vanilla survival servers.**
-It doesn't have many features from the vanilla game, such as vanilla world generation, redstone, mob AI, and various other things.
+While maintaining full compatibility with the PocketMine-MP ecosystem, Pokkit introduces massive core enhancements tailored for modern, competitive, and feature-rich servers.
 
-If you just want to play **vanilla survival multiplayer**, consider using the [official Minecraft: Bedrock server software](https://minecraft.net/download/server/bedrock) instead of PocketMine-MP.
+### 🚀 Key Features & Enhancements (Why choose Pokkit?)
 
-If that's not an option for you, you may be able to add some of PocketMine-MP's missing features using plugins from [Poggit](https://poggit.pmmp.io/plugins), or write plugins to implement them yourself.
+*   📦 **Complete Content Registry:** Unlike vanilla PocketMine-MP, Pokkit natively includes **100% of all Minecraft items and blocks**, giving you full creative freedom without relying on heavy external plugins.
+*   ⚔️ **Optimized PvP Mechanics:** Built-in enhancements for player-versus-player combat, offering smoother hit registration, better knockback handling, and a more responsive competitive experience.
+*   ⚡ **Next-Level Performance:** Under-the-hood optimizations allowing you to push player counts higher (100+ players) with reduced tick lag and better resource management.
+*   🧩 **Powerful Plugin API:** Full compatibility with standard PocketMine-MP plugins. Extend and customize your gameplay seamlessly.
+*   🌐 **Multi-world Support:** Manage multiple worlds on a single server node effortlessly.
+
+---
+
+## ⚠️ Is Pokkit right for you?
+
+Pokkit is designed for creators who want to build custom network experiences (Minigames, Factions, Skyblock, KitPvP) with a complete arsenal of vanilla items.
+
+> **Note:** Just like standard PocketMine-MP, Pokkit focuses on performance and customizability. It does **not** feature vanilla mob AI, vanilla redstone logic, or vanilla world generation out of the box.
+
+If you are looking for a pure, unmodified survival experience with vanilla mechanics, you should use the [official Minecraft: Bedrock server software](https://minecraft.net/download/server/bedrock).
+
+---
 
 ## Getting Started
-- [Documentation](http://pmmp.readthedocs.org/)
-- [Installation instructions](https://pmmp.readthedocs.io/en/rtfd/installation.html)
-- [Docker image](https://github.com/pmmp/PocketMine-MP/pkgs/container/pocketmine-mp)
-- [Plugin repository](https://poggit.pmmp.io/plugins)
+
+*   [Documentation](http://pmmp.readthedocs.org/)
+*   [Installation instructions](https://pmmp.readthedocs.io/en/rtfd/installation.html)
+*   [Docker image](https://github.com/ErodiaPE/Pokkit/pkgs/container/pocketmine-mp)
+*   [Plugin repository (Poggit)](https://poggit.pmmp.io/plugins)
 
 ## Community & Support
-Join our [Discord](https://discord.gg/bmSAZBG) server to chat with other users and developers.
 
-You can also post questions on [StackOverflow](https://stackoverflow.com/tags/pocketmine) under the tag `pocketmine`.
+Join our [Discord](https://discord.gg/bmSAZBG) server to chat with other users and developers, or ask questions on [StackOverflow](https://stackoverflow.com/tags/pocketmine) using the `pocketmine` tag.
+
+---
 
 ## Developing Plugins
-If you want to write your own plugins, the following resources may be useful.
-Don't forget you can always ask our community if you need help.
 
- * [Developer documentation](https://devdoc.pmmp.io) - General documentation for PocketMine-MP plugin developers
- * [Latest release API documentation](https://apidoc.pmmp.io) - Doxygen API documentation generated for each release
- * [Latest bleeding-edge API documentation](https://apidoc-dev.pmmp.io) - Doxygen API documentation generated weekly from `major-next` branch
- * [DevTools](https://github.com/pmmp/DevTools/) - Development tools plugin for creating plugins
- * [ExamplePlugin](https://github.com/pmmp/ExamplePlugin/) - Example plugin demonstrating some basic API features
+Pokkit shares its core API with PocketMine-MP. You can use standard development resources:
 
-## Contributing to PocketMine-MP
-PocketMine-MP accepts community contributions! The following resources will be useful if you want to contribute to PocketMine-MP.
- * [Building and running PocketMine-MP from source](BUILDING.md)
- * [Contributing Guidelines](CONTRIBUTING.md)
+*   [Developer documentation](https://devdoc.pmmp.io) - General documentation for plugin developers
+*   [Latest release API documentation](https://apidoc.pmmp.io) - Doxygen API documentation
+*   [DevTools](https://github.com/pmmp/DevTools/) - Developer tools for creating plugins
+*   [ExamplePlugin](https://github.com/pmmp/ExamplePlugin/) - Basic API usage example
 
-New here? Check out [issues with the "Easy task" label](https://github.com/pmmp/PocketMine-MP/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Easy%20task%22) for things you could work to familiarise yourself with the codebase.
+---
 
-## Donate
-PocketMine-MP is free, but it requires a lot of time and effort from unpaid volunteers to develop. Donations enable us to keep delivering support for new versions and adding features your players love.
+## Contributing & Development
 
-You can support development using the following methods:
+We welcome community contributions to improve Pokkit!
+*   [Building and running Pokkit from source](BUILDING.md)
+*   [Contributing Guidelines](CONTRIBUTING.md)
 
-- [Patreon](https://www.patreon.com/pocketminemp)
-- Bitcoin (BTC): `bc1q2v5ngyf8ugyd55kqa9ep35g2rv342ueqm6ks33`
-- Stellar Lumens (XLM): `GAAC5WZ33HCTE3BFJFZJXONMEIBNHFLBXM2HJVAZHXXPYA3HP5XPPS7T`
+---
 
-Thanks for your support!
+## Licensing Information
 
-## Licensing information
-This project is licensed under LGPL-3.0. Please see the [LICENSE](/LICENSE) file for details.
+This project is licensed under the LGPL-3.0 License. Please see the [LICENSE](/LICENSE) file for details.
 
-pmmp/PocketMine are not affiliated with Mojang. All brands and trademarks belong to their respective owners. PocketMine-MP is not a Mojang-approved software, nor is it associated with Mojang.
+*Pokkit is a fork of PocketMine-MP. Pokkit, PocketMine, and PMMP are not affiliated with Mojang Studios or Microsoft. All brands and trademarks belong to their respective owners.*

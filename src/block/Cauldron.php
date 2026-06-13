@@ -37,24 +37,23 @@ use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use function assert;
 
-final class Cauldron extends Transparent{
+class Cauldron extends Transparent{
 
 	public function writeStateToWorld() : void{
 		parent::writeStateToWorld();
 		$tile = $this->position->getWorld()->getTile($this->position);
 		assert($tile instanceof TileCauldron);
 
-		//empty cauldrons don't use this information
 		$tile->setCustomWaterColor(null);
 		$tile->setPotionItem(null);
 	}
 
 	protected function recalculateCollisionBoxes() : array{
 		$result = [
-			AxisAlignedBB::one()->trim(Facing::UP, 11 / 16) //bottom of the cauldron
+			AxisAlignedBB::one()->trim(Facing::UP, 11 / 16)
 		];
 
-		foreach(Facing::HORIZONTAL as $f){ //add the frame parts around the bowl
+		foreach(Facing::HORIZONTAL as $f){
 			$result[] = AxisAlignedBB::one()->trim($f, 14 / 16);
 		}
 		return $result;
@@ -100,5 +99,29 @@ final class Cauldron extends Transparent{
 			$world->setBlock($this->position, $cauldron);
 			$world->addSound($this->position->add(0.5, 0.5, 0.5), $cauldron->getFillSound());
 		}
+	}
+
+	public function fillWithWater() : void{
+		$world = $this->position->getWorld();
+		$waterCauldron = VanillaBlocks::WATER_CAULDRON()->setFillLevel(WaterCauldron::WATER_BOTTLE_FILL_AMOUNT);
+		$world->setBlock($this->position, $waterCauldron);
+	}
+
+	public function fillWithLava() : void{
+		$world = $this->position->getWorld();
+		$lavaCauldron = VanillaBlocks::LAVA_CAULDRON()->setFillLevel(FillableCauldron::MAX_FILL_LEVEL);
+		$world->setBlock($this->position, $lavaCauldron);
+	}
+
+	public function getFluid() : self{
+		return $this;
+	}
+
+	public function getEmptyFluid() : self{
+		return $this;
+	}
+
+	public function isSame(Cauldron $block) : bool{
+		return $block->getTypeId() === $this->getTypeId();
 	}
 }

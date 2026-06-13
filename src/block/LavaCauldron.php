@@ -2,7 +2,7 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
+ * ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
  * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
@@ -84,5 +84,13 @@ final class LavaCauldron extends FillableCauldron{
 		}
 
 		return true;
+	}
+
+	public function fillWithLava() : void{
+		if($this->getFillLevel() < self::MAX_FILL_LEVEL){
+			$world = $this->position->getWorld();
+			$world->setBlock($this->position, $this->withFillLevel(self::MAX_FILL_LEVEL));
+			$world->addSound($this->position->add(0.5, 0.5, 0.5), $this->getFillSound());
+		}
 	}
 }

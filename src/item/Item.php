@@ -40,7 +40,6 @@ use pocketmine\entity\Living;
 use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\LittleEndianNbtSerializer;
-use pocketmine\nbt\NBT;
 use pocketmine\nbt\NbtException;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
@@ -656,6 +655,23 @@ class Item implements \JsonSerializable{
 	 */
 	public function onInteractEntity(Player $player, Entity $entity, Vector3 $clickVector) : bool{
 		return false;
+	}
+
+	/**
+	 * @param Player $player
+	 *
+	 * @return void
+	 */
+	public function whileUsing(Player $player) : void{
+	}
+
+	/**
+	 * @param Entity $entity
+	 * @param float  $damage
+	 *
+	 * @return void
+	 */
+	public function onPostAttack(Entity $entity, float $damage) : void{
 	}
 
 	/**

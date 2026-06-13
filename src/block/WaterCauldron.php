@@ -2,7 +2,7 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
+ * ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
  * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
@@ -74,8 +74,6 @@ final class WaterCauldron extends FillableCauldron{
 		$potionItem = $tile instanceof TileCauldron ? $tile->getPotionItem() : null;
 		if($potionItem !== null){
 			//TODO: HACK! we keep potion cauldrons as a separate block type due to different behaviour, but in the
-			//blockstate they are typically indistinguishable from water cauldrons. This hack converts cauldrons into
-			//their appropriate type.
 			return VanillaBlocks::POTION_CAULDRON()->setFillLevel($this->getFillLevel())->setPotionItem($potionItem);
 		}
 
@@ -132,12 +130,12 @@ final class WaterCauldron extends FillableCauldron{
 		}elseif($item instanceof Armor){
 			if($this->customWaterColor !== null){
 				if(match($item->getTypeId()){ //TODO: a DyeableArmor class would probably be a better idea, since not all types of armor are dyeable
-					ItemTypeIds::LEATHER_CAP,
-					ItemTypeIds::LEATHER_TUNIC,
-					ItemTypeIds::LEATHER_PANTS,
-					ItemTypeIds::LEATHER_BOOTS => true,
-					default => false
-				} && $item->getCustomColor()?->toRGBA() !== $this->customWaterColor->toRGBA()){
+						ItemTypeIds::LEATHER_CAP,
+						ItemTypeIds::LEATHER_TUNIC,
+						ItemTypeIds::LEATHER_PANTS,
+						ItemTypeIds::LEATHER_BOOTS => true,
+						default => false
+					} && $item->getCustomColor()?->toRGBA() !== $this->customWaterColor->toRGBA()){
 					$item->setCustomColor($this->customWaterColor);
 					$world->setBlock($this->position, $this->withFillLevel($this->getFillLevel() - self::DYE_ARMOR_USE_AMOUNT));
 					$world->addSound($this->position->add(0.5, 0.5, 0.5), new CauldronDyeItemSound());
@@ -204,6 +202,20 @@ final class WaterCauldron extends FillableCauldron{
 				$world->setBlock($this->position, $this->setCustomWaterColor(null)->setFillLevel(FillableCauldron::MAX_FILL_LEVEL));
 				$world->addSound($this->position->add(0.5, 0.5, 0.5), $this->getFillSound());
 			}
+		}
+	}
+
+	public function fillWithWater() : void{
+		$world = $this->position->getWorld();
+		$currentLevel = $this->getFillLevel();
+
+		if($currentLevel < self::MAX_FILL_LEVEL || $this->customWaterColor !== null){
+			$this->setCustomWaterColor(null);
+
+			$nextBlock = $this->withFillLevel($currentLevel + 1);
+
+			$world->setBlock($this->position, $nextBlock);
+			$world->addSound($this->position->add(0.5, 0.5, 0.5), $this->getFillSound());
 		}
 	}
 }
