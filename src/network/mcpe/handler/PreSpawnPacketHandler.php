@@ -116,7 +116,8 @@ class PreSpawnPacketHandler extends PacketHandler{
 				false,
 				null,
 				new ServerTelemetryData("", "", "", ""),
-				[]
+				[],
+				0
 			));
 
 			$this->session->getLogger()->debug("Sending items");
