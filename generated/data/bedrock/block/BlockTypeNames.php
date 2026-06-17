@@ -990,6 +990,7 @@ final class BlockTypeNames{
 	public const POLISHED_SULFUR = "minecraft:polished_sulfur";
 	public const POLISHED_SULFUR_DOUBLE_SLAB = "minecraft:polished_sulfur_double_slab";
 	public const POLISHED_SULFUR_SLAB = "minecraft:polished_sulfur_slab";
+	public const SULFUR_SPIKE = "minecraft:sulfur_spike";
 	public const POLISHED_SULFUR_STAIRS = "minecraft:polished_sulfur_stairs";
 	public const POLISHED_SULFUR_WALL = "minecraft:polished_sulfur_wall";
 	public const POLISHED_TUFF = "minecraft:polished_tuff";

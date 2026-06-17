@@ -113,10 +113,11 @@ class PreSpawnPacketHandler extends PacketHandler{
 				false,
 				false,
 				new NetworkPermissions(disableClientSounds: true),
+				false,
 				null,
 				new ServerTelemetryData("", "", "", ""),
 				[],
-				0,
+				0
 			));
 
 			$this->session->getLogger()->debug("Sending items");
